@@ -2,18 +2,20 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{DFBAD5A6-858B-4295-8CF8-07F9112966EC}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{E66AD64D-8386-4233-8543-6D5314B3092C}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CodeMercury</RootNamespace>
-    <AssemblyName>CodeMercury</AssemblyName>
+    <RootNamespace>CodeMercury.Test</RootNamespace>
+    <AssemblyName>CodeMercury.Test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,7 +24,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -45,16 +48,13 @@
     <Reference Include="System.Interactive">
       <HintPath>..\..\Packages\Ix_Experimental-Main.1.1.10823\lib\Net4\System.Interactive.dll</HintPath>
     </Reference>
-    <Reference Include="System.Reactive.Core, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="System.Reactive.Core">
       <HintPath>..\..\Packages\Rx-Core.2.0.21114\lib\Net40\System.Reactive.Core.dll</HintPath>
     </Reference>
-    <Reference Include="System.Reactive.Interfaces, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="System.Reactive.Interfaces">
       <HintPath>..\..\Packages\Rx-Interfaces.2.0.21114\lib\Net40\System.Reactive.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="System.Reactive.Linq, Version=2.0.20823.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="System.Reactive.Linq">
       <HintPath>..\..\Packages\Rx-Linq.2.0.21114\lib\Net40\System.Reactive.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Reactive.PlatformServices">
@@ -67,45 +67,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Expressions\BindParameterExpressionVisitor.cs" />
-    <Compile Include="EnumHelper.cs" />
-    <Compile Include="Expressions\ExpressionHelper.cs" />
-    <Compile Include="Graphs\GraphHelper.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Network\MercuryDebug.cs" />
-    <Compile Include="Network\MercuryEnvelope.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Network\MercuryHelper.cs" />
-    <Compile Include="Network\MercuryNode.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="BoolString.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Models\FunctionException.cs" />
-    <Compile Include="Functional.cs" />
-    <Compile Include="Json\JsonHelper.cs" />
-    <Compile Include="Models\FunctionApplication.cs" />
-    <Compile Include="Models\FunctionArgument.cs" />
-    <Compile Include="Models\FunctionResult.cs" />
-    <Compile Include="Models\FunctionTask.cs" />
-    <Compile Include="RandomHelper.cs" />
-    <Compile Include="StringHelper.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Zmq\ZmqDebug.cs" />
-    <Compile Include="Zmq\ZmqEnvelope.cs" />
-    <Compile Include="Zmq\SocketHelper.cs" />
-    <Compile Include="Json\JMessage.cs" />
-    <Compile Include="Zmq\ZmqObservable.cs" />
-    <Compile Include="Zmq\ZmqObserver.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\packages\clrzmq.2.2.5\content\libzmq.dll">
-      <Link>_Dependencies\libzmq.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <ProjectReference Include="..\CodeMercury\CodeMercury.csproj">
+      <Project>{DFBAD5A6-858B-4295-8CF8-07F9112966EC}</Project>
+      <Name>CodeMercury</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

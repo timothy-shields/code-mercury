@@ -9,6 +9,7 @@ namespace CodeMercury.Zmq
 {
     /// <summary>
     /// Abstracted ZMQ Receiver
+    /// Want in the future to include support for different socket types (ROUTER, DEALER, PULL, SUB)
     /// </summary>
     public class ZmqObservable : IObservable<ZmqEnvelope>
     {
@@ -49,7 +50,7 @@ namespace CodeMercury.Zmq
                 using (var context = new Context())
                 using (var router = context.Socket(SocketType.ROUTER))
                 {
-                    router.StringToIdentity(Identity, Encoding.Unicode);
+                    router.StringToIdentity(Identity.ToString(), Encoding.Unicode);
                     router.Bind(Address);
 
                     while (!cancellationToken.IsCancellationRequested)
@@ -58,18 +59,14 @@ namespace CodeMercury.Zmq
                         if (sender == null)
                             continue;
                         var value = router.Recv();
+
+                        if (ZmqDebug.PrintSendRecv)
+                            Console.WriteLine("zmq: [{0}] <-recv-- [{1}]", this.Identity, sender);
+
                         subject.OnNext(new ZmqEnvelope
                         {
-                            Sender = new ZmqEndpoint
-                            {
-                                Address = this.Address,
-                                Identity = sender
-                            },
-                            Recipient = new ZmqEndpoint
-                            {
-                                Address = null,
-                                Identity = this.Identity
-                            },
+                            Sender = sender,
+                            Recipient = this.Identity,
                             Message = JMessage.Deserialize(value)
                         });
                     }

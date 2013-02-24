@@ -88,5 +88,21 @@ namespace CodeMercury
             try { return _try(); }
             catch (TException e) { return _catch(e); }
         }
+
+        public static void Lock<T>(T _object, Action _lock)
+        {
+            lock (_object)
+            {
+                _lock();
+            }
+        }
+
+        public static TResult Lock<T, TResult>(T _object, Func<TResult> _lock)
+        {
+            lock (_object)
+            {
+                return _lock();
+            }
+        }
     }
 }
