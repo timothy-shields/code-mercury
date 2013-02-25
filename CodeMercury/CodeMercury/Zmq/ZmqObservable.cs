@@ -50,7 +50,7 @@ namespace CodeMercury.Zmq
                 using (var context = new Context())
                 using (var router = context.Socket(SocketType.ROUTER))
                 {
-                    router.StringToIdentity(Identity.ToString(), Encoding.Unicode);
+                    router.StringToIdentity(Identity, Encoding.Unicode);
                     router.Bind(Address);
 
                     while (!cancellationToken.IsCancellationRequested)
