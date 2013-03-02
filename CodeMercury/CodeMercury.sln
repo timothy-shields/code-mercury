@@ -14,26 +14,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{6FC742
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
-		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9DFC72B6-C9DD-4485-84AB-D1EBFEC7DD2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9DFC72B6-C9DD-4485-84AB-D1EBFEC7DD2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DFC72B6-C9DD-4485-84AB-D1EBFEC7DD2A}.Debug|x64.ActiveCfg = Debug|x64
 		{9DFC72B6-C9DD-4485-84AB-D1EBFEC7DD2A}.Debug|x64.Build.0 = Debug|x64
-		{9DFC72B6-C9DD-4485-84AB-D1EBFEC7DD2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9DFC72B6-C9DD-4485-84AB-D1EBFEC7DD2A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9DFC72B6-C9DD-4485-84AB-D1EBFEC7DD2A}.Release|x64.ActiveCfg = Release|x64
 		{9DFC72B6-C9DD-4485-84AB-D1EBFEC7DD2A}.Release|x64.Build.0 = Release|x64
-		{277E87F4-6DFE-4CE5-95BD-F56A55E6B646}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{277E87F4-6DFE-4CE5-95BD-F56A55E6B646}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{277E87F4-6DFE-4CE5-95BD-F56A55E6B646}.Debug|x64.ActiveCfg = Debug|x64
 		{277E87F4-6DFE-4CE5-95BD-F56A55E6B646}.Debug|x64.Build.0 = Debug|x64
-		{277E87F4-6DFE-4CE5-95BD-F56A55E6B646}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{277E87F4-6DFE-4CE5-95BD-F56A55E6B646}.Release|Any CPU.Build.0 = Release|Any CPU
 		{277E87F4-6DFE-4CE5-95BD-F56A55E6B646}.Release|x64.ActiveCfg = Release|x64
 		{277E87F4-6DFE-4CE5-95BD-F56A55E6B646}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
