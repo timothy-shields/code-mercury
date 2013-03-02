@@ -5,8 +5,8 @@ using System.Text;
 
 namespace CodeMercury.Network
 {
-    public static class MercuryDebug
+    public static class CommDebug
     {
-        public const bool PrintSendRecv = false;
+        public static readonly bool PrintSendRecv = false;
     }
 }

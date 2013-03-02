@@ -73,14 +73,11 @@
     <Compile Include="Graphs\GraphHelper.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Network\MercuryDebug.cs" />
-    <Compile Include="Network\MercuryEnvelope.cs">
+    <Compile Include="Network\CommDebug.cs" />
+    <Compile Include="Network\CommEnvelope.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Network\MercuryHelper.cs" />
-    <Compile Include="Network\MercuryNode.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Network\CommHelper.cs" />
     <Compile Include="BoolString.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -91,6 +88,11 @@
     <Compile Include="Models\FunctionArgument.cs" />
     <Compile Include="Models\FunctionResult.cs" />
     <Compile Include="Models\FunctionTask.cs" />
+    <Compile Include="Network\CommNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Network\KnowledgeNode.cs" />
+    <Compile Include="Zmq\ZmqNode.cs" />
     <Compile Include="RandomHelper.cs" />
     <Compile Include="StringHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

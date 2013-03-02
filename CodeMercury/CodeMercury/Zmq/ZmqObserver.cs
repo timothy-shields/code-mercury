@@ -25,7 +25,7 @@ namespace CodeMercury.Zmq
         private BlockingCollection<ZmqEnvelope> queue;
         private Thread thread;
 
-        private ZmqObserver(string identity, IEnumerable<string> connectTo, CancellationToken cancellationToken)
+        public ZmqObserver(string identity, IEnumerable<string> connectTo, CancellationToken cancellationToken)
         {
             this.Identity = identity;
             this.connectTo = connectTo.ToList();
@@ -33,11 +33,6 @@ namespace CodeMercury.Zmq
             this.queue = new BlockingCollection<ZmqEnvelope>();
             this.thread = new Thread(Run);
             this.thread.Start();
-        }
-
-        public static ZmqObserver Create(string identity, IEnumerable<string> connectTo, CancellationToken cancellationToken)
-        {
-            return new ZmqObserver(identity, connectTo, cancellationToken);
         }
 
         public void OnNext(ZmqEnvelope value)
@@ -85,9 +80,7 @@ namespace CodeMercury.Zmq
                         }
                     }
                 }
-                catch (OperationCanceledException)
-                {
-                }
+                catch (OperationCanceledException) { }
             }
         }
     }

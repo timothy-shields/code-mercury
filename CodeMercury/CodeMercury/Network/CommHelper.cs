@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CodeMercury.Network
 {
-    public static class MercuryHelper
+    public static class CommHelper
     {
         public static string MercuryToZmq(BoolString mercuryIdentity)
         {

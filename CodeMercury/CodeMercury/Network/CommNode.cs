@@ -13,18 +13,17 @@ using CodeMercury.Json;
 
 namespace CodeMercury.Network
 {
-    public class MercuryNode : ISubject<MercuryEnvelope>
+    public class CommNode : ISubject<CommEnvelope>
     {
         public BoolString Identity { get; private set; }
         public string Address { get; private set; }
 
         private Dictionary<BoolString, string> neighbors;
 
-        private Subject<MercuryEnvelope> subject;
+        private Subject<CommEnvelope> subject;
 
         private CancellationToken cancellationToken;
-        private ZmqObservable zmqObservable;
-        private ZmqObserver zmqObserver;
+        private ZmqNode zmqNode;
         private Random random = new Random();
 
         //private FunctionApplication functionApplication;
@@ -35,36 +34,30 @@ namespace CodeMercury.Network
         /// </summary>
         //private HashSet<string> notify = new HashSet<string>();
 
-        private MercuryNode(BoolString identity, string address, List<Tuple<BoolString, string>> connectTo, CancellationToken cancellationToken)
+        public CommNode(BoolString identity, string address, List<Tuple<BoolString, string>> connectTo, CancellationToken cancellationToken)
         {
             this.Identity = identity;
             this.Address = address;
 
             this.neighbors = connectTo.ToDictionary(x => x.Item1, x => x.Item2);
 
-            this.subject = new Subject<MercuryEnvelope>();
+            this.subject = new Subject<CommEnvelope>();
 
             this.cancellationToken = cancellationToken;
-            this.zmqObservable = ZmqObservable.Create(MercuryHelper.MercuryToZmq(identity), address, cancellationToken);
-            this.zmqObserver = ZmqObserver.Create(MercuryHelper.MercuryToZmq(identity), connectTo.Select(x => x.Item2), cancellationToken);
+            this.zmqNode = new ZmqNode(CommHelper.MercuryToZmq(identity), address, connectTo.Select(x => x.Item2), cancellationToken);
 
-            zmqObservable.Subscribe(ZmqOnNext, ZmqOnError, ZmqOnCompleted, cancellationToken);
-        }
-
-        public static MercuryNode Create(BoolString identity, string address, List<Tuple<BoolString, string>> connectTo, CancellationToken cancellationToken)
-        {
-            return new MercuryNode(identity, address, connectTo, cancellationToken);
+            zmqNode.Subscribe(ZmqOnNext, ZmqOnError, ZmqOnCompleted, cancellationToken);
         }
 
         private void ZmqOnNext(ZmqEnvelope zmqEnvelope)
         {
-            zmqEnvelope.Message.When<MercuryEnvelope>(mercuryEnvelope =>
+            zmqEnvelope.Message.When<CommEnvelope>(mercuryEnvelope =>
             {
                 mercuryEnvelope.Trace.Add(this.Identity);
 
                 if (mercuryEnvelope.Recipient.Equals(this.Identity))
                 {
-                    if (MercuryDebug.PrintSendRecv)
+                    if (CommDebug.PrintSendRecv)
                     {
                         Console.WriteLine("mercury: [{0}] <-recv-- [{1}]", mercuryEnvelope.Recipient, mercuryEnvelope.Sender);
                         Console.WriteLine("trace: {0}", string.Join(" -> ", mercuryEnvelope.Trace.Select(x => "[{0}]".Format(x))));
@@ -90,21 +83,21 @@ namespace CodeMercury.Network
         }
 
 
-        private void Send(MercuryEnvelope mercuryEnvelope)
+        private void Send(CommEnvelope mercuryEnvelope)
         {
             //Forward through the network toward the final recipient
             var neighborIdentity = RandomHelper.RandomItem(
                 neighbors.Keys.MinBy(x => BoolString.HammingDistance(x, mercuryEnvelope.Recipient)));
-            zmqObserver.OnNext(ZmqEnvelope.Create(MercuryHelper.MercuryToZmq(neighborIdentity), JMessage.FromValue(mercuryEnvelope)));
+            zmqNode.OnNext(ZmqEnvelope.Create(CommHelper.MercuryToZmq(neighborIdentity), JMessage.FromValue(mercuryEnvelope)));
         }
 
-        public void OnNext(MercuryEnvelope mercuryEnvelope)
+        public void OnNext(CommEnvelope mercuryEnvelope)
         {
             mercuryEnvelope.Sender = this.Identity;
 
             mercuryEnvelope.Trace = new List<BoolString> { this.Identity };
 
-            if (MercuryDebug.PrintSendRecv)
+            if (CommDebug.PrintSendRecv)
                 Console.WriteLine("mercury: [{0}] --send-> [{1}]", mercuryEnvelope.Sender, mercuryEnvelope.Recipient);
 
             Send(mercuryEnvelope);
@@ -112,15 +105,15 @@ namespace CodeMercury.Network
 
         public void OnError(System.Exception error)
         {
-            zmqObserver.OnError(error);
+            zmqNode.OnError(error);
         }
 
         public void OnCompleted()
         {
-            zmqObserver.OnCompleted();
+            zmqNode.OnCompleted();
         }
 
-        public IDisposable Subscribe(IObserver<MercuryEnvelope> observer)
+        public IDisposable Subscribe(IObserver<CommEnvelope> observer)
         {
             return subject.Subscribe(observer);
         }

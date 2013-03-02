@@ -6,7 +6,7 @@ using CodeMercury.Json;
 
 namespace CodeMercury.Network
 {
-    public class MercuryEnvelope
+    public class CommEnvelope
     {
         public BoolString Sender { get; set; }
         public BoolString Recipient { get; set; }
@@ -18,9 +18,9 @@ namespace CodeMercury.Network
 
         public JMessage Message { get; set; }
 
-        public static MercuryEnvelope Create(BoolString recipient, JMessage message)
+        public static CommEnvelope Create(BoolString recipient, JMessage message)
         {
-            return new MercuryEnvelope
+            return new CommEnvelope
             {
                 Recipient = recipient,
                 Message = message

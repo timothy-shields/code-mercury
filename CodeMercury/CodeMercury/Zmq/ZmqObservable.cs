@@ -21,7 +21,7 @@ namespace CodeMercury.Zmq
         private Subject<ZmqEnvelope> subject;
         private Thread thread;
 
-        private ZmqObservable(string identity, string address, CancellationToken cancellationToken)
+        public ZmqObservable(string identity, string address, CancellationToken cancellationToken)
         {
             this.Identity = identity;
             this.Address = address;
@@ -31,11 +31,6 @@ namespace CodeMercury.Zmq
 
             this.thread = new Thread(Run);
             this.thread.Start();
-        }
-
-        public static ZmqObservable Create(string identity, string address, CancellationToken cancellationToken)
-        {
-            return new ZmqObservable(identity, address, cancellationToken);
         }
 
         public IDisposable Subscribe(IObserver<ZmqEnvelope> observer)

@@ -36,7 +36,7 @@ namespace CodeMercury.Test
                 {
                     var address = addresses[identity];
                     var connectTo = graph[identity].Select(neighbor => Tuple.Create(neighbor, addresses[neighbor])).ToList();
-                    return MercuryNode.Create(identity, address, connectTo, cancellationSource.Token);
+                    return new CommNode(identity, address, connectTo, cancellationSource.Token);
                 })
                 .ToDictionary(x => x.Identity);
 
@@ -58,9 +58,9 @@ namespace CodeMercury.Test
             {
                 random.NextBytes(buffer);
                 Interlocked.Increment(ref sent);
-                mercuryNodes[new BoolString("000000")].OnNext(MercuryEnvelope.Create(new BoolString("111111"), JMessage.FromValue(buffer)));
+                mercuryNodes[new BoolString("000000")].OnNext(CommEnvelope.Create(new BoolString("111111"), JMessage.FromValue(buffer)));
                 Interlocked.Increment(ref sent);
-                mercuryNodes[new BoolString("111000")].OnNext(MercuryEnvelope.Create(new BoolString("000111"), JMessage.FromValue(buffer)));
+                mercuryNodes[new BoolString("111000")].OnNext(CommEnvelope.Create(new BoolString("000111"), JMessage.FromValue(buffer)));
             }
 
             Console.ReadLine();

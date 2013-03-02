@@ -7,6 +7,6 @@ namespace CodeMercury.Zmq
 {
     public static class ZmqDebug
     {
-        public const bool PrintSendRecv = false;
+        public static readonly bool PrintSendRecv = false;
     }
 }
