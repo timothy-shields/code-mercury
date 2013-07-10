@@ -38,6 +38,11 @@ namespace CodeMercury
             this.boundedBits.RemoveRange(i, this.boundedBits.Count - i);
         }
 
+        public BoolString(IEnumerable<byte> boundedBytes)
+            : this(boundedBytes.SelectMany(b => Enumerable.Range(0, 8).Select(x => (byte)(1 << x)).Select(x => (b & x) != 0)))
+        {
+        }
+
         public BoolString(string boundedBits)
             : this(boundedBits.Select(x => x != '0'))
         {

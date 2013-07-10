@@ -26,14 +26,6 @@ namespace CodeMercury.Network
         private ZmqNode zmqNode;
         private Random random = new Random();
 
-        //private FunctionApplication functionApplication;
-        //private FunctionResult functionResult;
-
-        /// <summary>
-        /// The set of identities to notify on the completion of the current FunctionApplication.
-        /// </summary>
-        //private HashSet<string> notify = new HashSet<string>();
-
         public CommNode(BoolString identity, string address, List<Tuple<BoolString, string>> connectTo, CancellationToken cancellationToken)
         {
             this.Identity = identity;

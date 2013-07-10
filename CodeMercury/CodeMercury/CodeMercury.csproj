@@ -56,6 +56,9 @@
     <Reference Include="clrzmq-ext">
       <HintPath>..\packages\clrzmq-x64.2.2.5\lib\clrzmq-ext.dll</HintPath>
     </Reference>
+    <Reference Include="MsgPack">
+      <HintPath>..\packages\MsgPack.Cli.0.3.2\lib\net40-client\MsgPack.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -89,6 +92,10 @@
     <Compile Include="Expressions\ExpressionHelper.cs" />
     <Compile Include="Functional.cs" />
     <Compile Include="Graphs\GraphHelper.cs" />
+    <Compile Include="HashHelper.cs" />
+    <Compile Include="Information\InformationHelper.cs" />
+    <Compile Include="Information\InformationKeyEqualityComparer.cs" />
+    <Compile Include="Information\InformationSet.cs" />
     <Compile Include="Json\JMessage.cs" />
     <Compile Include="Json\JsonHelper.cs" />
     <Compile Include="Models\FunctionApplication.cs" />
@@ -96,6 +103,8 @@
     <Compile Include="Models\FunctionException.cs" />
     <Compile Include="Models\FunctionResult.cs" />
     <Compile Include="Models\FunctionTask.cs" />
+    <Compile Include="MsgPack\MpObject.cs" />
+    <Compile Include="MsgPack\MpHelper.cs" />
     <Compile Include="Network\CommDebug.cs" />
     <Compile Include="Network\CommEnvelope.cs" />
     <Compile Include="Network\CommHelper.cs" />

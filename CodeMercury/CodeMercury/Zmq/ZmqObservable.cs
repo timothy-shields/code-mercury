@@ -4,6 +4,7 @@ using System.Threading;
 using ZMQ;
 using System.Text;
 using CodeMercury.Json;
+using System.Threading.Tasks;
 
 namespace CodeMercury.Zmq
 {

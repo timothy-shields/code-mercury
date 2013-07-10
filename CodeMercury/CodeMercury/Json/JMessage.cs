@@ -40,10 +40,19 @@ namespace CodeMercury.Json
                 action(JsonHelper.ToObject<T>(Value));
         }
 
-        public static string Hash(JMessage message)
+        public static byte[] Hash(JMessage message)
         {
-            using (var sha1 = SHA1.Create())
-                return Convert.ToBase64String(sha1.ComputeHash(Serialize(message)));
+            return HashHelper.ComputeHash(Serialize(message));
+        }
+
+        public static string HashString(JMessage message)
+        {
+            return Convert.ToBase64String(Hash(message));
+        }
+
+        public static BoolString HashBoolString(JMessage message)
+        {
+            return new BoolString(Hash(message).Take(2));
         }
 
         public static byte[] Serialize(JMessage message)
