@@ -10,6 +10,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using CodeMercury.Json;
+using CodeMercury.Information;
 
 namespace CodeMercury.Network
 {
@@ -19,6 +20,7 @@ namespace CodeMercury.Network
         public string Address { get; private set; }
 
         private Dictionary<BoolString, string> neighbors;
+        private InformationSet informationSet;
 
         private Subject<CommEnvelope> subject;
 
@@ -66,6 +68,7 @@ namespace CodeMercury.Network
 
         private void ZmqOnError(System.Exception e)
         {
+            subject.OnError(e);
         }
 
         private void ZmqOnCompleted()

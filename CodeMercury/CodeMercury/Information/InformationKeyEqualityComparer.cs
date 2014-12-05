@@ -13,6 +13,9 @@ namespace CodeMercury.Information
             return Enumerable.SequenceEqual(x, y);
         }
 
+        /// <summary>
+        /// Use the first 4 bytes of a hashcode as the .NET hash.
+        /// </summary>
         public int GetHashCode(byte[] obj)
         {
             return BitConverter.ToInt32(obj, 0);

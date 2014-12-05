@@ -57,12 +57,12 @@ namespace CodeMercury.Json
 
         public static byte[] Serialize(JMessage message)
         {
-            return Encoding.ASCII.GetBytes(JToken.FromObject(message).ToString(Formatting.None));
+            return Encoding.UTF8.GetBytes(JToken.FromObject(message).ToString(Formatting.None));
         }
 
         public static JMessage Deserialize(byte[] message)
         {
-            return JToken.Parse(Encoding.ASCII.GetString(message)).ToObject<JMessage>();
+            return JToken.Parse(Encoding.UTF8.GetString(message)).ToObject<JMessage>();
         }
     }
 }
