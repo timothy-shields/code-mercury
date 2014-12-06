@@ -1,4 +1,5 @@
 ﻿using Castle.Windsor;
+using CodeMercury.Components;
 using CodeMercury.Expressions;
 using Microsoft.Owin.Hosting;
 using Newtonsoft.Json;
@@ -7,6 +8,9 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
+using Nito.AsyncEx.Synchronous;
+using System.Threading.Tasks;
+using Example;
 
 namespace CodeMercury.WebApi
 {
@@ -18,51 +22,38 @@ namespace CodeMercury.WebApi
             {
                 container.Install(new WindsorInstaller());
 
-                var port = int.Parse(args[0]);
+                var port = 9090;// int.Parse(args[0]);
                 var url = string.Format("http://localhost:{0}/", port);
                 var activator = new WindsorCompositionRoot(container);
                 var startup = new Startup(activator);
                 using (WebApp.Start(url, startup.Configuration))
                 {
-                    Expression<Func<string>> expression = () => string.Join(" * ", 1, 2, 3, 4);
-
-                    using (var client = new HttpClient())
-                    {
-                        var response = client.PostAsJsonAsync(url + "calls", CreateCall(expression)).Result;
-
-                        var json = JToken.Parse(response.Content.ReadAsStringAsync().Result);
-
-                        Console.WriteLine(response);
-                        Console.WriteLine(expression.ToString() + " ---> " + json["return_value"].ToObject(json["return_type"].ToObject<Type>()));
-                    }
+                    var invoker = container.Resolve<HttpInvoker>();
+                    
+                    var name = "Timothy";
+                    var task = invoker.InvokeAsync(() => string.Format("Hello, {0}!", name));
+                    var result = task.WaitAndUnwrapException();
+                    Console.WriteLine(result);
 
                     Console.ReadLine();
                 }
             }
         }
 
-        private static Models.Call CreateCall(LambdaExpression expression)
+        /// <summary>
+        /// Test out some proxy behavior.
+        /// </summary>
+        /// <param name="invoker">The invoker supplied by code mercury.</param>
+        /// <param name="username">The username to use in the greeting.</param>
+        /// <returns>The content "Hello, Timothy! You have unread messages."</returns>
+        public static async Task<string> Test(IInvoker invoker, string username)
         {
-            return new Models.Call
-            {
-                Function = new Models.Function
-                {
-                    DeclaringType = expression.Body.As<MethodCallExpression>().Method.DeclaringType,
-                    Name = expression.Body.As<MethodCallExpression>().Method.Name,
-                    Parameters = expression.Body.As<MethodCallExpression>().Method.GetParameters().Select(parameter => new Models.Parameter
-                    {
-                        ParameterType = parameter.ParameterType,
-                        Name = parameter.Name
-                    }).ToList()
-                },
-                Arguments = expression
-                    .Body
-                    .As<MethodCallExpression>()
-                    .Arguments
-                    .Select(ExpressionHelper.Evaluate)
-                    .Select(JToken.FromObject)
-                    .ToList()
-            };
+            var gizmoCache = new LocalGizmoCache();
+            var gizmoId = 7;
+            await gizmoCache.PutGizmoAsync(new Gizmo(gizmoId, "You have unread messages.", true));
+            await invoker.InvokeAsync(() => Runtime.MakeGizmoFriendly(7, "Timothy", gizmoCache));
+            var gizmo = await gizmoCache.GetGizmoAsync(gizmoId);
+            return gizmo.Content;
         }
     }
 }

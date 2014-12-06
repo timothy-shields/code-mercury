@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4A56CB4F-F4B2-44D3-B192-68D588BA7B7B}</ProjectGuid>
+    <ProjectGuid>{39148646-7D76-4D5A-B8E4-4E582AC3ACEF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CodeMercury.WebApi.Models</RootNamespace>
     <AssemblyName>CodeMercury.WebApi.Models</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -46,11 +45,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CallRequest.cs" />
     <Compile Include="Call.cs" />
     <Compile Include="CallCompletion.cs" />
     <Compile Include="CallException.cs" />
-    <Compile Include="CallReceipt.cs" />
+    <Compile Include="CallRequest.cs" />
     <Compile Include="CallStatus.cs" />
     <Compile Include="Function.cs" />
     <Compile Include="Parameter.cs" />

@@ -1,4 +1,5 @@
-﻿using CodeMercury.Expressions;
+﻿using CodeMercury.Domain.Models;
+using CodeMercury.Expressions;
 using CodeMercury.WebApi.Models;
 using Newtonsoft.Json.Linq;
 using System;
@@ -15,122 +16,113 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.Components
 {
-    public class HttpInvoker : IInvoker, IDisposable
+    public class HttpInvoker : IInvoker, IInvocationObserver
     {
         private HttpClient client;
-        private IDisposable completionsSubscription;
+        private ConcurrentDictionary<Guid, InvocationContext> contexts;
 
-        private ConcurrentDictionary<Guid, CallContext> contexts = new ConcurrentDictionary<Guid, CallContext>();
-
-        private class CallContext : IDisposable
+        private class InvocationContext
         {
             public MethodInfo Method { get; private set; }
-            public object[] Arguments { get; private set; }
-            public Call Call { get; private set; }
-            public Guid CallId { get { return Call.CallId; } }
             private TaskCompletionSource<object> taskCompletionSource;
-            private CancellationTokenRegistration cancellationTokenRegistration;
 
-            public Task Completion { get; private set; }
+            public Task<object> Task
+            {
+                get { return taskCompletionSource.Task; }
+            }
 
-            public CallContext(MethodInfo method, object[] arguments)
+            public InvocationContext(MethodInfo method)
             {
                 Method = method;
-                Arguments = arguments;
-                Call = new Call
-                {
-                    CallId = Guid.NewGuid(),
-                    Function = new Function
-                    {
-                        DeclaringType = method.DeclaringType,
-                        Name = method.Name,
-                        Parameters = method.GetParameters()
-                            .Select(parameter => new Parameter
-                            {
-                                ParameterType = parameter.ParameterType,
-                                Name = parameter.Name
-                            })
-                            .ToList()
-                    },
-                    Arguments = Enumerable.Zip(method.GetParameters(), arguments, ConvertArgument).ToList()
-                };
                 taskCompletionSource = new TaskCompletionSource<object>();
-                Completion = taskCompletionSource.Task;
             }
 
-            private JToken ConvertArgument(ParameterInfo parameter, object argument)
+            public void TrySetResult(JToken result)
             {
-                if (parameter.ParameterType.Equals(typeof(CancellationToken)))
-                {
-                    var cancellationToken = (CancellationToken)argument;
-                    cancellationTokenRegistration = cancellationToken.Register(OnCanceling, false);
-                    return null;
-                }
-                return JToken.FromObject(argument);
+                //TODO needs to be the *effective* return type of the method, not the actual return type (Task<T> vs T)
+                taskCompletionSource.TrySetResult(result.ToObject(Method.ReturnType));
             }
 
-            private void OnCanceling()
+            public void TrySetCanceled()
             {
                 taskCompletionSource.TrySetCanceled();
             }
 
-            public void OnCompleted(CallCompletion completion)
+            public void TrySetException(InvocationException exception)
             {
-                taskCompletionSource.TrySetResult(null);
-            }
-
-            public void Dispose()
-            {
-                throw new NotImplementedException();
+                taskCompletionSource.TrySetException(exception);
             }
         }
 
-        public HttpInvoker(HttpClient client, IObservable<CallCompletion> completions)
+        public HttpInvoker(HttpClient client)
         {
             this.client = client;
-            completionsSubscription = completions.Subscribe(OnCompleted);
+            this.contexts = new ConcurrentDictionary<Guid, InvocationContext>();
         }
 
         public async Task<object> InvokeAsync(MethodInfo method, object[] arguments)
         {
-            var context = new CallContext(method, arguments);
-            if (!contexts.TryAdd(context.CallId, context))
+            var key = Guid.NewGuid();
+            var context = new InvocationContext(method);
+            if (!contexts.TryAdd(key, context))
             {
                 //TODO: need more elegant handling of this case
                 throw new Exception("This shouldn't ever happen.");
             }
-            var putCallResponse = await client.PostAsJsonAsync("calls", context.Call).ConfigureAwait(false);
-            var receipt = await putCallResponse.Content.ReadAsAsync<CallReceipt>().ConfigureAwait(false);
-            await context.Completion.ConfigureAwait(false);
-            var getCallResponse = await client.GetAsync(receipt.CallUri).ConfigureAwait(false);
-            var call = await getCallResponse.Content.ReadAsAsync<Call>();
-            switch (call.Status)
+            try
             {
-                case CallStatus.RanToCompletion:
-                    return call.Result.ToObject(context.Method.ReturnType);
-                case CallStatus.Canceled:
-                    throw new OperationCanceledException();
-                case CallStatus.Faulted:
-                    throw new InvocationException(call.Exception.Content);
-                default:
-                    throw new Exception("This shouldn't ever happen.");
+                var request = new CallRequest
+                {
+                    RequesterUri = new Uri("http://localhost:9090/"),
+                    CallId = Guid.NewGuid(),
+                    Function = new WebApi.Models.Function
+                    {
+                        DeclaringType = method.DeclaringType,
+                        Name = method.Name,
+                        Parameters = method.GetParameters().Select(parameter => new WebApi.Models.Parameter
+                        {
+                            ParameterType = parameter.ParameterType,
+                            Name = parameter.Name
+                        }).ToList()
+                    },
+                    Arguments = arguments.Select(argument => JToken.FromObject(argument)).ToList()
+                };
+                var response = await client.PostAsJsonAsync("calls", request);
+                response.EnsureSuccessStatusCode();
+                return await context.Task;
+            }
+            finally
+            {
+                contexts.TryRemove(key, out context);
             }
         }
 
-        private void OnCompleted(CallCompletion completion)
+        private InvocationContext GetContext(Guid key)
         {
-            CallContext context;
-            if (!contexts.TryRemove(completion.CallId, out context))
+            InvocationContext context;
+            if (!contexts.TryGetValue(key, out context))
             {
-                //TODO: need more elegant handling of this case
-                throw new Exception("This shouldn't ever happen.");
+                throw new Exception("This should never happen.");
             }
-            context.OnCompleted(completion);
+            return context;
         }
 
-        public void Dispose()
+        public void OnResult(Guid key, JToken result)
         {
-            completionsSubscription.Dispose();
+            var context = GetContext(key);
+            context.TrySetResult(result);
+        }
+
+        public void OnCancellation(Guid key)
+        {
+            var context = GetContext(key);
+            context.TrySetCanceled();
+        }
+
+        public void OnException(Guid key, InvocationException exception)
+        {
+            var context = GetContext(key);
+            context.TrySetException(exception);
         }
     }
 }

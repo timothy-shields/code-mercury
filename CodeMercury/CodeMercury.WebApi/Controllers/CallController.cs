@@ -7,10 +7,12 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Web.Hosting;
 using System.Collections.Concurrent;
 using CodeMercury.Components;
 using System.Net.Http;
+using System.Threading;
+using System.Net;
+using Nito.AspNetBackgroundTasks;
 
 namespace CodeMercury.WebApi.Controllers
 {
@@ -18,60 +20,107 @@ namespace CodeMercury.WebApi.Controllers
     {
         private readonly IInvoker invoker;
         private readonly HttpClient client;
+        private readonly IInvocationObserver observer;
 
-        public CallController(IInvoker invoker)
+        public CallController(IInvoker invoker, IInvocationObserver observer)
         {
             if (invoker == null)
             {
                 throw new ArgumentNullException("invoker");
             }
+            if (observer == null)
+            {
+                throw new ArgumentNullException("observer");
+            }
 
             this.invoker = invoker;
             this.client = new HttpClient();
+            this.observer = observer;
         }
 
         [Route("calls")]
-        public CallReceipt PostCall(CallRequest request)
+        public void PostCall(CallRequest request)
         {
-            HostingEnvironment.QueueBackgroundWorkItem(async cancellationToken =>
+            BackgroundTaskManager.Run(async () =>
             {
-                var method = ConvertFunction(request.Function);
-                var arguments = Enumerable.Zip(request.Function.Parameters, request.Arguments, ConvertParameterAndArgument).ToArray();
-                var result = await invoker.InvokeAsync(method, arguments);
-                var uri = new Uri(request.RequesterUri, Url.Route("PutCallCompletion", new { call_id = request.CallId }));
-                var completion = new CallCompletion();
-                await client.PutAsJsonAsync(uri, completion, cancellationToken);
+                var cancellationToken = BackgroundTaskManager.Shutdown;
+                var method = request.Function.DeclaringType.GetMethod(
+                    request.Function.Name,
+                    request.Function.Parameters
+                        .Select(parameter => parameter.ParameterType)
+                        .ToArray());
+                var arguments =
+                    Enumerable.Zip(
+                        request.Function.Parameters,
+                        request.Arguments,
+                        (parameter, argument) =>
+                        {
+                            if (parameter.ParameterType == typeof(CancellationToken))
+                            {
+                                return cancellationToken;
+                            }
+                            return argument.ToObject(parameter.ParameterType);
+                        })
+                    .ToArray();
+                CallCompletion completion = null;
+                object result = null;
+                try
+                {
+                    result = await invoker.InvokeAsync(method, arguments);
+                }
+                catch (OperationCanceledException)
+                {
+                    completion = new CallCompletion
+                    {
+                        CallId = request.CallId,
+                        Status = CallStatus.Canceled
+                    };
+                }
+                catch (Exception exception)
+                {
+                    completion = new CallCompletion
+                    {
+                        CallId = request.CallId,
+                        Status = CallStatus.Faulted,
+                        Exception = new CallException
+                        {
+                            Content = exception.ToString()
+                        }
+                    };
+                }
+                if (completion == null)
+                {
+                    completion = new CallCompletion
+                    {
+                        CallId = request.CallId,
+                        Status = CallStatus.RanToCompletion,
+                        Result = JToken.FromObject(result)
+                    };
+                }
+                var uri = new Uri(request.RequesterUri, Url.Route("PostCallCompletion", null));
+                var response = await client.PostAsJsonAsync(uri, completion, cancellationToken);
+                var error = await response.Content.ReadAsStringAsync();
+                response.EnsureSuccessStatusCode();
             });
-            return new CallReceipt
-            {
-                CallId = request.CallId,
-                CallUri = Url.Route("GetCall", new { call_id = request.CallId })
-            };
         }
-
-        private MethodInfo ConvertFunction(Function function)
+        
+        [Route("completions", Name = "PostCallCompletion")]
+        public void PostCallCompletion(CallCompletion completion)
         {
-            return function.DeclaringType.GetMethod(function.Name, function.Parameters.Select(parameter => parameter.ParameterType).ToArray());
-        }
-
-        private object ConvertParameterAndArgument(Parameter parameter, JToken argument)
-        {
-            if (parameter.ParameterType == typeof(CancellationToken))
+            switch (completion.Status)
             {
-                return cancellationTokenSource.Token;
+                case CallStatus.RanToCompletion:
+                    observer.OnResult(completion.CallId, completion.Result);
+                    break;
+                case CallStatus.Canceled:
+                    observer.OnCancellation(completion.CallId);
+                    break;
+                case CallStatus.Faulted:
+                    observer.OnException(completion.CallId, new Domain.Models.InvocationException(completion.Exception.Content));
+                    break;
+                default:
+                    throw new Exception("This shouldn't ever happen.");
             }
-            return argument.ToObject(parameter.ParameterType);
-        }
-
-        [Route("calls/{call_id}", Name = "GetCall")]
-        public Task<Call> GetCall(Guid call_id)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Route("calls/{call_id}/completion", Name = "PutCallCompletion")]
-        public Task PutCallCompletion(Guid call_id, CallCompletion completion)
-        {
         }
     }
 }

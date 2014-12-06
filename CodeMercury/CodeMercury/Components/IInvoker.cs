@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.Components
 {
+    // TODO This really needs to be defined in terms of a MethodCallExpression.
     public interface IInvoker
     {
         Task<object> InvokeAsync(MethodInfo method, object[] arguments);

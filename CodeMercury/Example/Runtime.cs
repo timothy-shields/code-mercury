@@ -1,5 +1,4 @@
-﻿using CodeMercury.Components;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +8,12 @@ namespace Example
 {
     public static class Runtime
     {
+        public static async Task<string> Thingy(string text)
+        {
+            await Task.Delay(1000);
+            return "Hello! " + text;
+        }
+
         public static async Task MakeGizmoFriendly(int gizmoId, string username, IGizmoCache gizmoCache)
         {
             var gizmo = await gizmoCache.GetGizmoAsync(gizmoId);

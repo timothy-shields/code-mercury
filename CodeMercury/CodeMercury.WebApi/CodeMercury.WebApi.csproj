@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0F28D260-9BBF-4269-975F-78A3A962FFE3}</ProjectGuid>
+    <ProjectGuid>{68292991-4580-4997-AAFF-E32077161323}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CodeMercury.WebApi</RootNamespace>
     <AssemblyName>CodeMercury.WebApi</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -41,21 +40,29 @@
     <Reference Include="Castle.Windsor">
       <HintPath>..\packages\Castle.Windsor.3.3.0\lib\net45\Castle.Windsor.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Owin, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Owin.3.0.0\lib\net45\Microsoft.Owin.dll</HintPath>
+    <Reference Include="Microsoft.Owin">
+      <HintPath>..\packages\Microsoft.Owin.2.0.2\lib\net45\Microsoft.Owin.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Owin.Host.HttpListener, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Owin.Host.HttpListener.3.0.0\lib\net45\Microsoft.Owin.Host.HttpListener.dll</HintPath>
+    <Reference Include="Microsoft.Owin.Host.HttpListener">
+      <HintPath>..\packages\Microsoft.Owin.Host.HttpListener.2.0.2\lib\net45\Microsoft.Owin.Host.HttpListener.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Owin.Hosting, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Owin.Hosting.3.0.0\lib\net45\Microsoft.Owin.Hosting.dll</HintPath>
+    <Reference Include="Microsoft.Owin.Hosting">
+      <HintPath>..\packages\Microsoft.Owin.Hosting.2.0.2\lib\net45\Microsoft.Owin.Hosting.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Nito.AspNetBackgroundTasks">
+      <HintPath>..\packages\Nito.AspNetBackgroundTasks.1.0.0\lib\net45\Nito.AspNetBackgroundTasks.dll</HintPath>
+    </Reference>
+    <Reference Include="Nito.AsyncEx">
+      <HintPath>..\packages\Nito.AsyncEx.3.0.0\lib\net45\Nito.AsyncEx.dll</HintPath>
+    </Reference>
+    <Reference Include="Nito.AsyncEx.Concurrent">
+      <HintPath>..\packages\Nito.AsyncEx.3.0.0\lib\net45\Nito.AsyncEx.Concurrent.dll</HintPath>
+    </Reference>
+    <Reference Include="Nito.AsyncEx.Enlightenment">
+      <HintPath>..\packages\Nito.AsyncEx.3.0.0\lib\net45\Nito.AsyncEx.Enlightenment.dll</HintPath>
     </Reference>
     <Reference Include="Owin">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
@@ -79,8 +86,6 @@
     <Reference Include="System.Reactive.PlatformServices">
       <HintPath>..\packages\Rx-PlatformServices.2.2.5\lib\net45\System.Reactive.PlatformServices.dll</HintPath>
     </Reference>
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Web.Http, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.2\lib\net45\System.Web.Http.dll</HintPath>
@@ -95,11 +100,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="WindsorCompositionRoot.cs" />
     <Compile Include="Controllers\CallController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="WindsorCompositionRoot.cs" />
     <Compile Include="WindsorInstaller.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -108,15 +113,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CodeMercury.WebApi.Models\CodeMercury.WebApi.Models.csproj">
-      <Project>{4a56cb4f-f4b2-44d3-b192-68d588ba7b7b}</Project>
+      <Project>{39148646-7d76-4d5a-b8e4-4e582ac3acef}</Project>
       <Name>CodeMercury.WebApi.Models</Name>
     </ProjectReference>
     <ProjectReference Include="..\CodeMercury\CodeMercury.csproj">
-      <Project>{9dfc72b6-c9dd-4485-84ab-d1ebfec7dd2a}</Project>
+      <Project>{3e0b87dc-f885-445e-b41b-fad6c6120519}</Project>
       <Name>CodeMercury</Name>
     </ProjectReference>
     <ProjectReference Include="..\Example\Example.csproj">
-      <Project>{40da2a79-4ca1-4284-b2a2-583ccf139a70}</Project>
+      <Project>{826a0060-99a7-4e25-ab21-69710015353e}</Project>
       <Name>Example</Name>
     </ProjectReference>
   </ItemGroup>
