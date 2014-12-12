@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CodeMercury.Domain.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -17,14 +18,15 @@ namespace CodeMercury.Components
             this.invokers = invokers.ToList();
         }
 
-        public async Task<object> InvokeAsync(MethodInfo method, object[] arguments)
+        public async Task<Argument> InvokeAsync(Invocation invocation)
         {
             int index;
             lock (random)
             {
                 index = random.Next(invokers.Count);
             }
-            return await invokers[index].InvokeAsync(method, arguments);
+            var invoker = invokers[index];
+            return await invoker.InvokeAsync(invocation);
         }
     }
 }

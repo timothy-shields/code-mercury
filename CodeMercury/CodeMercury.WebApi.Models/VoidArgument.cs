@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.WebApi.Models
 {
-    [DataContract(Name = "call_exception")]
-    public class CallException
+    [DataContract(Name = "void_argument")]
+    public class VoidArgument : Argument
     {
-        [DataMember(Name = "content")]
-        public string Content { get; set; }
+        public override ArgumentKind Kind
+        {
+            get { return ArgumentKind.Void; }
+        }
     }
 }

@@ -20,10 +20,10 @@ namespace CodeMercury.WebApi
 
                 // Register controllers
 
-                Component.For<CallController>()
+                Component.For<InvocationController>()
                     .DependsOn(Dependency.OnComponent<IInvoker, LocalInvoker>())
                     .DependsOn(Dependency.OnComponent<IInvocationObserver, HttpInvoker>())
-                    .LifestylePerWebRequest(),
+                    .LifestyleTransient(),
 
                 // Register components
 

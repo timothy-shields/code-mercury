@@ -31,13 +31,19 @@ namespace CodeMercury.WebApi
                     var invoker = container.Resolve<HttpInvoker>();
                     
                     var name = "Timothy";
-                    var task = invoker.InvokeAsync(() => string.Format("Hello, {0}!", name));
+                    var task = invoker.InvokeAsync(() => BuildNameAsync(name));
                     var result = task.WaitAndUnwrapException();
                     Console.WriteLine(result);
 
                     Console.ReadLine();
                 }
             }
+        }
+
+        static async Task<string> BuildNameAsync(string name)
+        {
+            await Task.Yield();
+            return string.Format("Hello, {0}!", name);
         }
 
         /// <summary>

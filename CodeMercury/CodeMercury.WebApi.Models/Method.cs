@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.WebApi.Models
 {
-    [DataContract(Name = "function")]
-    public class Function
+    [DataContract(Name = "method")]
+    public class Method
     {
         [DataMember(Name = "declaring_type")]
         public Type DeclaringType { get; set; }

@@ -11,9 +11,10 @@ namespace CodeMercury.Expressions
         public static object Evaluate(Expression expression)
         {
             if (expression.NodeType == ExpressionType.Constant)
-                return expression.As<ConstantExpression>().Value;
-            else
-                return Expression.Lambda(expression).Compile().DynamicInvoke();
+            {
+                return expression.CastTo<ConstantExpression>().Value;
+            }
+            return Expression.Lambda(expression).Compile().DynamicInvoke();
         }
 
         public static Expression<Func<TResult>> BindInput<T, TResult>(Expression<Func<T, TResult>> expression, T input)

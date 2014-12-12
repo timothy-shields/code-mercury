@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.WebApi.Models
 {
-    [DataContract]
-    public enum CallStatus
+    [DataContract(Name = "invocation_status")]
+    public enum InvocationStatus
     {
         [EnumMember(Value = "ran_to_completion")]
         RanToCompletion,

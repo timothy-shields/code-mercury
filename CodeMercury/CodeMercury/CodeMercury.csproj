@@ -93,15 +93,29 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BoolString.cs" />
+    <Compile Include="Components\CodeMercuryBugException.cs" />
     <Compile Include="Components\CompositeInvoker.cs" />
+    <Compile Include="Components\DefaultProxyActivator.cs" />
+    <Compile Include="Components\DefaultProxyContainer.cs" />
     <Compile Include="Components\HttpInvoker.cs" />
     <Compile Include="Components\IInvocationObserver.cs" />
     <Compile Include="Components\IInvoker.cs" />
     <Compile Include="Components\InvokerExtensions.cs" />
+    <Compile Include="Components\IProxy.cs" />
+    <Compile Include="Components\IProxyableResolver.cs" />
+    <Compile Include="Components\IProxyActivator.cs" />
+    <Compile Include="Components\IProxyContainer.cs" />
+    <Compile Include="Components\IProxyResolver.cs" />
+    <Compile Include="Components\IProxyableContainer.cs" />
     <Compile Include="Components\LocalInvoker.cs" />
-    <Compile Include="Domain\Models\Function.cs" />
+    <Compile Include="Domain\Models\Argument.cs" />
+    <Compile Include="Domain\Models\Method.cs" />
+    <Compile Include="Domain\Models\Invocation.cs" />
     <Compile Include="Domain\Models\InvocationException.cs" />
     <Compile Include="Domain\Models\Parameter.cs" />
+    <Compile Include="Domain\Models\ProxyArgument.cs" />
+    <Compile Include="Domain\Models\ValueArgument.cs" />
+    <Compile Include="Domain\Models\VoidArgument.cs" />
     <Compile Include="EnumHelper.cs" />
     <Compile Include="Expressions\BindParameterExpressionVisitor.cs" />
     <Compile Include="Expressions\ExpressionHelper.cs" />
@@ -112,13 +126,13 @@
     <Compile Include="StringHelper.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\CodeMercury.WebApi.Models\CodeMercury.WebApi.Models.csproj">
       <Project>{39148646-7d76-4d5a-b8e4-4e582ac3acef}</Project>
       <Name>CodeMercury.WebApi.Models</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

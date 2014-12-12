@@ -11,7 +11,7 @@ namespace CodeMercury.Components
 {
     public interface IInvocationObserver
     {
-        void OnResult(Guid key, JToken result);
+        void OnResult(Guid key, Argument result);
         void OnCancellation(Guid key);
         void OnException(Guid key, InvocationException exception);
     }

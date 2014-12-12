@@ -1,6 +1,5 @@
 ﻿using CodeMercury.Domain.Models;
 using CodeMercury.Expressions;
-using CodeMercury.WebApi.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
@@ -9,6 +8,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.Reactive.Disposables;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -18,29 +18,34 @@ namespace CodeMercury.Components
 {
     public class HttpInvoker : IInvoker, IInvocationObserver
     {
-        private HttpClient client;
-        private ConcurrentDictionary<Guid, InvocationContext> contexts;
+        private readonly Uri requesterUri;
+        private readonly HttpClient client;
+        private readonly IProxyableContainer proxyableContainer;
+        private readonly ConcurrentDictionary<Guid, InvocationContext> contexts = new ConcurrentDictionary<Guid, InvocationContext>();
 
-        private class InvocationContext
+        private class InvocationContext : IDisposable
         {
-            public MethodInfo Method { get; private set; }
-            private TaskCompletionSource<object> taskCompletionSource;
+            public Guid Key { get; private set; }
+            public Invocation Invocation { get; private set; }
+            private IDisposable disposable;
+            private TaskCompletionSource<Argument> taskCompletionSource;
 
-            public Task<object> Task
+            public Task<Argument> Task
             {
                 get { return taskCompletionSource.Task; }
             }
 
-            public InvocationContext(MethodInfo method)
+            public InvocationContext(Guid key, Invocation invocation, IDisposable disposable)
             {
-                Method = method;
-                taskCompletionSource = new TaskCompletionSource<object>();
+                Key = key;
+                Invocation = invocation;
+                this.disposable = disposable;
+                taskCompletionSource = new TaskCompletionSource<Argument>();
             }
 
-            public void TrySetResult(JToken result)
+            public void TrySetResult(Argument result)
             {
-                //TODO needs to be the *effective* return type of the method, not the actual return type (Task<T> vs T)
-                taskCompletionSource.TrySetResult(result.ToObject(Method.ReturnType));
+                taskCompletionSource.TrySetResult(result);
             }
 
             public void TrySetCanceled()
@@ -52,49 +57,107 @@ namespace CodeMercury.Components
             {
                 taskCompletionSource.TrySetException(exception);
             }
-        }
 
-        public HttpInvoker(HttpClient client)
-        {
-            this.client = client;
-            this.contexts = new ConcurrentDictionary<Guid, InvocationContext>();
-        }
-
-        public async Task<object> InvokeAsync(MethodInfo method, object[] arguments)
-        {
-            var key = Guid.NewGuid();
-            var context = new InvocationContext(method);
-            if (!contexts.TryAdd(key, context))
+            public void Dispose()
             {
-                //TODO: need more elegant handling of this case
-                throw new Exception("This shouldn't ever happen.");
+                disposable.Dispose();
             }
-            try
+        }
+
+        public HttpInvoker(Uri requesterUri, Uri serverUri, IProxyableContainer proxyableContainer)
+        {
+            this.requesterUri = requesterUri;
+            this.client = new HttpClient { BaseAddress = serverUri };
+            this.proxyableContainer = proxyableContainer;
+        }
+
+        public async Task<Argument> InvokeAsync(Invocation invocation)
+        {
+            using (var context = CreateContext(invocation))
             {
-                var request = new CallRequest
+                var request = new WebApi.Models.InvocationRequest
                 {
-                    RequesterUri = new Uri("http://localhost:9090/"),
-                    CallId = Guid.NewGuid(),
-                    Function = new WebApi.Models.Function
-                    {
-                        DeclaringType = method.DeclaringType,
-                        Name = method.Name,
-                        Parameters = method.GetParameters().Select(parameter => new WebApi.Models.Parameter
-                        {
-                            ParameterType = parameter.ParameterType,
-                            Name = parameter.Name
-                        }).ToList()
-                    },
-                    Arguments = arguments.Select(argument => JToken.FromObject(argument)).ToList()
+                    RequesterUri = requesterUri,
+                    InvocationId = context.Key,
+                    Object = null, //TODO Handle instance method invocations
+                    Method = ConvertMethod(invocation.Method),
+                    Arguments = invocation.Arguments.Select(ConvertArgument).Select(JToken.FromObject).ToList()
                 };
-                var response = await client.PostAsJsonAsync("calls", request);
+                var response = await client.PostAsJsonAsync("invocations", request);
                 response.EnsureSuccessStatusCode();
                 return await context.Task;
             }
-            finally
+        }
+
+        private static WebApi.Models.Method ConvertMethod(Method method)
+        {
+            return new WebApi.Models.Method
             {
-                contexts.TryRemove(key, out context);
+                DeclaringType = method.DeclaringType,
+                Name = method.Name,
+                Parameters = method.Parameters
+                    .Select(parameter => new WebApi.Models.Parameter
+                    {
+                        ParameterType = parameter.ParameterType,
+                        Name = parameter.Name
+                    })
+                    .ToList()
+            };
+        }
+
+        private WebApi.Models.Argument ConvertArgument(Argument argument)
+        {
+            if (argument is ValueArgument)
+            {
+                return ConvertValueArgument((ValueArgument)argument);
             }
+            else
+            {
+                throw new CodeMercuryBugException();
+            }
+        }
+
+        private WebApi.Models.Argument ConvertValueArgument(ValueArgument valueArgument)
+        {
+            var value = valueArgument.Value;
+            if (IsProxyable(value))
+            {
+                var proxyId = Guid.NewGuid();
+                proxyableContainer.Register(proxyId, value);
+                return new WebApi.Models.ProxyArgument
+                {
+                    ProxyId = proxyId
+                };
+            }
+            else
+            {
+                return new WebApi.Models.ValueArgument
+                {
+                    Value = JToken.FromObject(value)
+                };
+            }
+        }
+
+        private static bool IsProxyable(object value)
+        {
+            return value != null && value.GetType().GetInterfaces()
+                .Any(interfaceType => interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IProxy<>));
+        }
+
+        private InvocationContext CreateContext(Invocation invocation)
+        {
+            var key = Guid.NewGuid();
+            var context = new InvocationContext(key, invocation, Disposable.Create(() =>
+            {
+                InvocationContext junk;
+                contexts.TryRemove(key, out junk);
+            }));
+            if (!contexts.TryAdd(key, context))
+            {
+                //TODO: need more elegant handling of this case
+                throw new CodeMercuryBugException();
+            }
+            return context;
         }
 
         private InvocationContext GetContext(Guid key)
@@ -102,12 +165,12 @@ namespace CodeMercury.Components
             InvocationContext context;
             if (!contexts.TryGetValue(key, out context))
             {
-                throw new Exception("This should never happen.");
+                throw new CodeMercuryBugException();
             }
             return context;
         }
 
-        public void OnResult(Guid key, JToken result)
+        public void OnResult(Guid key, Argument result)
         {
             var context = GetContext(key);
             context.TrySetResult(result);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CodeMercury.Domain.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -8,9 +9,11 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.Components
 {
-    // TODO This really needs to be defined in terms of a MethodCallExpression.
+    /// <summary>
+    /// Invokes <see cref="Invocation"/> instances.
+    /// </summary>
     public interface IInvoker
     {
-        Task<object> InvokeAsync(MethodInfo method, object[] arguments);
+        Task<Argument> InvokeAsync(Invocation invocation);
     }
 }

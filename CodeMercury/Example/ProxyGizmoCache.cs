@@ -7,25 +7,23 @@ using System.Threading.Tasks;
 
 namespace Example
 {
-    public class ProxyGizmoCache : IGizmoCache
+    public class ProxyGizmoCache : IGizmoCache, IProxy<IGizmoCache>
     {
-        private readonly IGizmoCache remote;
         private readonly IInvoker invoker;
 
-        public ProxyGizmoCache(IGizmoCache remote, IInvoker invoker)
+        public ProxyGizmoCache(IInvoker invoker)
         {
-            this.remote = remote;
             this.invoker = invoker;
         }
 
         public async Task<Gizmo> GetGizmoAsync(int id)
         {
-            return await invoker.InvokeAsync(() => remote.GetGizmoAsync(id));
+            return await invoker.InvokeAsync(() => GetGizmoAsync(id));
         }
 
         public async Task PutGizmoAsync(Gizmo gizmo)
         {
-            await invoker.InvokeAsync(() => remote.PutGizmoAsync(gizmo));
+            await invoker.InvokeAsync(() => PutGizmoAsync(gizmo));
         }
     }
 }
