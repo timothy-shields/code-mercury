@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 namespace CodeMercury.Components
 {
     /// <summary>
-    /// Stores references to remote service types.
+    /// Stores local service instances.
     /// </summary>
-    public interface IProxyContainer
+    public interface IServiceContainer
     {
         /// <summary>
-        /// Registers a remote service type.
+        /// Registers a local service instance.
         /// </summary>
         /// <param name="serviceId">The service ID.</param>
-        /// <param name="serviceType">The service interface type.</param>
-        void Register(Guid serviceId, Type serviceType);
+        /// <param name="serviceInstance">The service instance.</param>
+        void Register(Guid serviceId, object serviceInstance);
     }
 }

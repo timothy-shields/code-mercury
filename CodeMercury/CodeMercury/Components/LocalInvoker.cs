@@ -14,45 +14,47 @@ namespace CodeMercury.Components
     /// </summary>
     public class LocalInvoker : IInvoker
     {
+        private readonly IServiceResolver serviceResolver;
         private readonly IProxyResolver proxyResolver;
 
         /// <summary>
         /// Constructs a <see cref="LocalInvoker"/>.
         /// </summary>
-        /// <param name="proxyResolver">The <see cref="IProxyResolver"/> to use when resolving <see cref="IProxy"/> instances from <see cref="ProxyArgument"/> arguments.</param>
-        public LocalInvoker(IProxyResolver proxyResolver)
+        /// <param name="serviceResolver">The <see cref="IServiceResolver"/> to use when resolving service instances from <see cref="ServiceArgument"/> arguments.</param>
+        /// <param name="proxyResolver">The <see cref="IProxyResolver"/> to use when resolving proxy instances from <see cref="ProxyArgument"/> arguments.</param>
+        public LocalInvoker(IServiceResolver serviceResolver, IProxyResolver proxyResolver)
         {
-            if (proxyResolver == null)
-            {
-                throw new ArgumentNullException("proxyResolver");
-            }
-
+            this.serviceResolver = serviceResolver;
             this.proxyResolver = proxyResolver;
         }
 
         public async Task<Argument> InvokeAsync(Invocation invocation)
         {
             var method = invocation.Method.ToMethodInfo();
-            var instance = GetInstanceArgument(invocation.Object);
+            var @object = ResolveObject(invocation.Object);
             var arguments = invocation.Arguments.Select(ResolveArgument).ToArray();
-            var result = Invoke(method, instance, arguments);
-            return await CreateResultArgumentAsync(method, result);
+            var result = Invoke(@object, method, arguments);
+            return await CreateResultAsync(method, result);
         }
 
-        private object GetInstanceArgument(Argument instance)
+        private object ResolveObject(Argument @object)
         {
-            if (instance == null)
+            if (@object == null)
             {
                 return null;
             }
-            return ResolveArgument(instance);
+            if (@object is ServiceArgument)
+            {
+                return serviceResolver.Resolve(@object.CastTo<ServiceArgument>().ServiceId);
+            }
+            throw new CodeMercuryBugException();
         }
 
-        private static object Invoke(MethodInfo method, object instance, object[] arguments)
+        private static object Invoke(object @object, MethodInfo method, object[] arguments)
         {
             try
             {
-                return method.Invoke(instance, arguments);
+                return method.Invoke(@object, arguments);
             }
             catch (TargetInvocationException exception)
             {
@@ -62,31 +64,18 @@ namespace CodeMercury.Components
 
         private object ResolveArgument(Argument argument)
         {
+            if (argument is ProxyArgument)
+            {
+                return proxyResolver.Resolve(argument.CastTo<ProxyArgument>().ServiceId);
+            }
             if (argument is ValueArgument)
             {
-                return ResolveValueArgument((ValueArgument)argument);
+                return argument.CastTo<ValueArgument>().Value;
             }
-            else if (argument is ProxyArgument)
-            {
-                return ResolveProxyArgument((ProxyArgument)argument);
-            }
-            else
-            {
-                throw new CodeMercuryBugException();
-            }
+            throw new CodeMercuryBugException();
         }
 
-        private static object ResolveValueArgument(ValueArgument valueArgument)
-        {
-            return valueArgument.Value;
-        }
-
-        private object ResolveProxyArgument(ProxyArgument proxyArgument)
-        {
-            return proxyResolver.Resolve(proxyArgument.Id);
-        }
-
-        private static async Task<Argument> CreateResultArgumentAsync(MethodInfo method, object result)
+        private static async Task<Argument> CreateResultAsync(MethodInfo method, object result)
         {
             if (method.ReturnType.IsSubclassOf(typeof(Task)))
             {
@@ -100,7 +89,7 @@ namespace CodeMercury.Components
                     throw new InvocationException(exception.InnerException);
                 }
             }
-            else if (method.ReturnType.Equals(typeof(Task)))
+            if (method.ReturnType.Equals(typeof(Task)))
             {
                 try
                 {
@@ -112,10 +101,7 @@ namespace CodeMercury.Components
                     throw new InvocationException(exception.InnerException);
                 }
             }
-            else
-            {
-                return new ValueArgument(result);
-            }
+            return new ValueArgument(result);
         }
     }
 }

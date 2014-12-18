@@ -6,8 +6,17 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.Components
 {
+    /// <summary>
+    /// Instantiates proxies.
+    /// </summary>
     public interface IProxyActivator
     {
-        IProxy Create(Type proxyType, IInvoker proxyInvoker);
+        /// <summary>
+        /// Instantiates a proxy.
+        /// </summary>
+        /// <param name="serviceType">The type of the remote service.</param>
+        /// <param name="proxyInvoker">The invoker to use in the proxy.</param>
+        /// <returns>The proxy instance.</returns>
+        IProxy Create(Type serviceType, IInvoker proxyInvoker);
     }
 }

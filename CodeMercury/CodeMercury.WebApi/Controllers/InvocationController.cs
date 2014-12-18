@@ -53,33 +53,9 @@ namespace CodeMercury.WebApi.Controllers
             {
                 var cancellationToken = BackgroundTaskManager.Shutdown;
 
-                Argument @object = null; //TODO Handle instance method calls
-                var method = new Method(
-                    invocationRequest.Method.DeclaringType,
-                    invocationRequest.Method.Name,
-                    invocationRequest.Method.Parameters.Select(parameter => new Parameter(parameter.ParameterType, parameter.Name)));
-                var arguments = Enumerable.Zip<WebApi.Models.Parameter, JToken, Argument>(
-                    invocationRequest.Method.Parameters,
-                    invocationRequest.Arguments,
-                    (parameter, argument) =>
-                    {
-                        var argumentKind = argument["kind"].ToObject<WebApi.Models.ArgumentKind>();
-                        if (argumentKind == WebApi.Models.ArgumentKind.Proxy)
-                        {
-                            var proxyArgument = argument.ToObject<WebApi.Models.ProxyArgument>();
-                            proxyContainer.Register(proxyArgument.ProxyId, parameter.ParameterType);
-                            return new ProxyArgument(proxyArgument.ProxyId);
-                        }
-                        else if (argumentKind == WebApi.Models.ArgumentKind.Value)
-                        {
-                            var valueArgument = argument.ToObject<WebApi.Models.ValueArgument>();
-                            return new ValueArgument(valueArgument.Value.ToObject(parameter.ParameterType));
-                        }
-                        else
-                        {
-                            throw new CodeMercuryBugException();
-                        }
-                    });
+                var @object = ConvertObject(invocationRequest.Object);
+                var method = ConvertMethod(invocationRequest.Method);
+                var arguments = ConvertArguments(invocationRequest);
                 var invocation = new Invocation(@object, method, arguments);
                 
                 WebApi.Models.InvocationCompletion completion = null;
@@ -114,7 +90,7 @@ namespace CodeMercury.WebApi.Controllers
                     {
                         InvocationId = invocationRequest.InvocationId,
                         Status = WebApi.Models.InvocationStatus.RanToCompletion,
-                        Result = JToken.FromObject(resultArgument) //TODO handle ProxyArgument
+                        Result = ConvertResult(method, resultArgument)
                     };
                 }
                 var uri = new Uri(invocationRequest.RequesterUri, Url.Route("PostInvocationCompletion", null));
@@ -123,19 +99,83 @@ namespace CodeMercury.WebApi.Controllers
                 response.EnsureSuccessStatusCode();
             });
         }
+
+        private Argument ConvertObject(WebApi.Models.Argument @object)
+        {
+            if (@object is WebApi.Models.ServiceArgument)
+            {
+                return new ServiceArgument(@object.CastTo<ServiceArgument>().ServiceId);
+            }
+            if (@object is WebApi.Models.StaticArgument)
+            {
+                return new StaticArgument();
+            }
+            throw new CodeMercuryBugException();
+        }
+
+        private static Method ConvertMethod(WebApi.Models.Method method)
+        {
+            return new Method(
+                method.DeclaringType,
+                method.Name,
+                method.Parameters.Select(parameter => new Parameter(parameter.ParameterType, parameter.Name)));
+        }
+
+        private IEnumerable<Argument> ConvertArguments(WebApi.Models.InvocationRequest invocationRequest)
+        {
+            return Enumerable.Zip<WebApi.Models.Parameter, WebApi.Models.Argument, Argument>(
+                invocationRequest.Method.Parameters,
+                invocationRequest.Arguments,
+                (parameter, argument) =>
+                {
+                    if (argument is WebApi.Models.ProxyArgument)
+                    {
+                        var serviceId = argument.CastTo<WebApi.Models.ProxyArgument>().ServiceId;
+                        proxyContainer.Register(serviceId, parameter.ParameterType);
+                        return new ProxyArgument(serviceId);
+                    }
+                    if (argument is WebApi.Models.ValueArgument)
+                    {
+                        return new ValueArgument(argument.CastTo<WebApi.Models.ValueArgument>().Value.ToObject(parameter.ParameterType));
+                    }
+                    throw new CodeMercuryBugException();
+                });
+        }
+
+        private WebApi.Models.Argument ConvertResult(Method method, Argument result)
+        {
+            if (result is ValueArgument)
+            {
+                var resultType = method.ToMethodInfo().ReturnType;
+                if (resultType.IsSubclassOf(typeof(Task)))
+                {
+                    resultType = resultType.GetGenericArguments().Single();
+                }
+                return new WebApi.Models.ValueArgument
+                {
+                    Type = resultType,
+                    Value = JToken.FromObject(result.CastTo<ValueArgument>().Value)
+                };   
+            }
+            if (result is VoidArgument)
+            {
+                return new WebApi.Models.VoidArgument();
+            }
+            throw new CodeMercuryBugException();
+        }
         
         [Route("completions", Name = "PostInvocationCompletion")]
         public void PostInvocationCompletion(WebApi.Models.InvocationCompletion completion)
         {
             if (completion.Status == WebApi.Models.InvocationStatus.RanToCompletion)
             {
-                var resultArgumentKind = completion.Result["kind"].ToObject<WebApi.Models.ArgumentKind>();
-                if (resultArgumentKind == WebApi.Models.ArgumentKind.Value)
+                var result = completion.Result;
+                if (result is WebApi.Models.ValueArgument)
                 {
-                    var valueArgument = completion.Result.ToObject<WebApi.Models.ValueArgument>();
+                    var valueArgument = (WebApi.Models.ValueArgument)result;
                     observer.OnResult(completion.InvocationId, new ValueArgument(valueArgument.Value.ToObject(valueArgument.Type)));
                 }
-                else if (resultArgumentKind == WebApi.Models.ArgumentKind.Void)
+                else if (result is WebApi.Models.VoidArgument)
                 {
                     observer.OnResult(completion.InvocationId, new VoidArgument());
                 }

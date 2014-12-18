@@ -18,7 +18,7 @@ namespace CodeMercury.WebApi.Models
         public InvocationStatus Status { get; set; }
 
         [DataMember(Name = "result")]
-        public JToken Result { get; set; }
+        public Argument Result { get; set; }
 
         [DataMember(Name = "exception")]
         public InvocationException Exception { get; set; }

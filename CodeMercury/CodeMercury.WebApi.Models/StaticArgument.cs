@@ -7,15 +7,12 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.WebApi.Models
 {
-    /// <summary>
-    /// Represents the result of a void-returning method.
-    /// </summary>
-    [DataContract(Name = "void_argument")]
-    public class VoidArgument : Argument
+    [DataContract]
+    public class StaticArgument : Argument
     {
         public override ArgumentKind Kind
         {
-            get { return ArgumentKind.Void; }
+            get { return ArgumentKind.Static; }
         }
     }
 }

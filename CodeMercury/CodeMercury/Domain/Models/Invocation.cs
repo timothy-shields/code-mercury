@@ -16,6 +16,10 @@ namespace CodeMercury.Domain.Models
 
         public Invocation(Argument @object, Method method, IEnumerable<Argument> arguments)
         {
+            if (@object == null)
+            {
+                throw new ArgumentNullException("object");
+            }
             if (method == null)
             {
                 throw new ArgumentNullException("method");

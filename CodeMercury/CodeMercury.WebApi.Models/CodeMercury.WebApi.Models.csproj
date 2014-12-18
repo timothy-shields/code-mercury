@@ -46,15 +46,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Argument.cs" />
+    <Compile Include="ArgumentJsonConverter.cs" />
     <Compile Include="ArgumentKind.cs" />
     <Compile Include="InvocationCompletion.cs" />
     <Compile Include="InvocationException.cs" />
     <Compile Include="InvocationRequest.cs" />
     <Compile Include="InvocationStatus.cs" />
+    <Compile Include="JsonCreationConverter.cs" />
     <Compile Include="Method.cs" />
     <Compile Include="Parameter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProxyArgument.cs" />
+    <Compile Include="ServiceArgument.cs" />
+    <Compile Include="StaticArgument.cs" />
     <Compile Include="ValueArgument.cs" />
     <Compile Include="VoidArgument.cs" />
   </ItemGroup>

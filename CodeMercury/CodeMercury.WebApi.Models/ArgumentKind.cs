@@ -12,6 +12,12 @@ namespace CodeMercury.WebApi.Models
         [EnumMember(Value = "proxy")]
         Proxy,
 
+        [EnumMember(Value = "service")]
+        Service,
+
+        [EnumMember(Value = "static")]
+        Static,
+
         [EnumMember(Value = "value")]
         Value,
 

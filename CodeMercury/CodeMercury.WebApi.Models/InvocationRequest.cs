@@ -18,12 +18,12 @@ namespace CodeMercury.WebApi.Models
         public Guid InvocationId { get; set; }
 
         [DataMember(Name = "object", IsRequired = false)]
-        public JToken Object { get; set; }
+        public Argument Object { get; set; }
 
         [DataMember(Name = "method", IsRequired = true)]
         public Method Method { get; set; }
 
         [DataMember(Name = "arguments", IsRequired = true)]
-        public IList<JToken> Arguments { get; set; }
+        public IList<Argument> Arguments { get; set; }
     }
 }

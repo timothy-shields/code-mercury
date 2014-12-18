@@ -16,7 +16,7 @@ namespace CodeMercury.WebApi.Models
             get { return ArgumentKind.Proxy; }
         }
         
-        [DataMember(Name = "proxy_id")]
-        public Guid ProxyId { get; set; }
+        [DataMember(Name = "service_id")]
+        public Guid ServiceId { get; set; }
     }
 }

@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.WebApi.Models
 {
-    /// <summary>
-    /// Represents the result of a void-returning method.
-    /// </summary>
-    [DataContract(Name = "void_argument")]
-    public class VoidArgument : Argument
+    [DataContract(Name = "service_argument")]
+    public class ServiceArgument : Argument
     {
         public override ArgumentKind Kind
         {
-            get { return ArgumentKind.Void; }
+            get { return ArgumentKind.Service; }
         }
+
+        [DataMember(Name = "service_id")]
+        public Guid ServiceId { get; set; }
     }
 }

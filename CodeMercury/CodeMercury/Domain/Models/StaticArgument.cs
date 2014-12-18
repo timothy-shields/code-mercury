@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace CodeMercury.Domain.Models
 {
     /// <summary>
-    /// Represents the result of a void- or Task-returning method.
+    /// Represents the absence of an Object in an <see cref="Invocation"/> for a static method.
     /// </summary>
-    public class VoidArgument : Argument
+    public class StaticArgument : Argument
     {
     }
 }

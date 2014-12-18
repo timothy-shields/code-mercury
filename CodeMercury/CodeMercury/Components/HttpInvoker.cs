@@ -20,7 +20,7 @@ namespace CodeMercury.Components
     {
         private readonly Uri requesterUri;
         private readonly HttpClient client;
-        private readonly IProxyableContainer proxyableContainer;
+        private readonly IServiceContainer proxyableContainer;
         private readonly ConcurrentDictionary<Guid, InvocationContext> contexts = new ConcurrentDictionary<Guid, InvocationContext>();
 
         private class InvocationContext : IDisposable
@@ -64,7 +64,7 @@ namespace CodeMercury.Components
             }
         }
 
-        public HttpInvoker(Uri requesterUri, Uri serverUri, IProxyableContainer proxyableContainer)
+        public HttpInvoker(Uri requesterUri, Uri serverUri, IServiceContainer proxyableContainer)
         {
             this.requesterUri = requesterUri;
             this.client = new HttpClient { BaseAddress = serverUri };
@@ -79,14 +79,37 @@ namespace CodeMercury.Components
                 {
                     RequesterUri = requesterUri,
                     InvocationId = context.Key,
-                    Object = null, //TODO Handle instance method invocations
+                    Object = ConvertObject(invocation.Object),
                     Method = ConvertMethod(invocation.Method),
-                    Arguments = invocation.Arguments.Select(ConvertArgument).Select(JToken.FromObject).ToList()
+                    Arguments = invocation.Arguments.Select(ConvertArgument).ToList()
                 };
                 var response = await client.PostAsJsonAsync("invocations", request);
                 response.EnsureSuccessStatusCode();
                 return await context.Task;
             }
+        }
+
+        private static WebApi.Models.Argument ConvertObject(Argument @object)
+        {
+            if (@object is ProxyArgument)
+            {
+                return new WebApi.Models.ProxyArgument
+                {
+                    ServiceId = @object.CastTo<ProxyArgument>().ServiceId
+                };
+            }
+            if (@object is StaticArgument)
+            {
+                return new WebApi.Models.StaticArgument();
+            }
+            if (@object is ValueArgument)
+            {
+                return new WebApi.Models.ValueArgument
+                {
+                    Value = JToken.FromObject(@object.CastTo<ValueArgument>().Value)
+                };
+            }
+            throw new CodeMercuryBugException();
         }
 
         private static WebApi.Models.Method ConvertMethod(Method method)
@@ -126,7 +149,7 @@ namespace CodeMercury.Components
                 proxyableContainer.Register(proxyId, value);
                 return new WebApi.Models.ProxyArgument
                 {
-                    ProxyId = proxyId
+                    ServiceId = proxyId
                 };
             }
             else
