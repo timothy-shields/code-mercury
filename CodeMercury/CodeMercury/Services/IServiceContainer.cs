@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CodeMercury.Components
+namespace CodeMercury.Services
 {
     /// <summary>
     /// Stores local service instances.
@@ -17,5 +17,11 @@ namespace CodeMercury.Components
         /// <param name="serviceId">The service ID.</param>
         /// <param name="serviceInstance">The service instance.</param>
         void Register(Guid serviceId, object serviceInstance);
+
+        /// <summary>
+        /// Unregisters a local service instance.
+        /// </summary>
+        /// <param name="serviceId">The service ID.</param>
+        void Release(Guid serviceId);
     }
 }

@@ -100,11 +100,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\HttpInvoker.cs" />
+    <Compile Include="Controllers\CompletionController.cs" />
     <Compile Include="Controllers\InvocationController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
-    <Compile Include="WindsorCompositionRoot.cs" />
+    <Compile Include="WindsorHttpControllerActivator.cs" />
     <Compile Include="WindsorInstaller.cs" />
   </ItemGroup>
   <ItemGroup>

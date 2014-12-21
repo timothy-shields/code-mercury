@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CodeMercury.Components
+namespace CodeMercury.Services
 {
     public interface IInvocationObserver
     {

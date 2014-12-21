@@ -13,34 +13,20 @@ using System.Net.Http;
 using System.Threading;
 using System.Net;
 using Nito.AspNetBackgroundTasks;
+using CodeMercury.Services;
 
 namespace CodeMercury.WebApi.Controllers
 {
     public class InvocationController : ApiController
     {
         private readonly IInvoker invoker;
-        private readonly IInvocationObserver observer;
         private readonly IProxyContainer proxyContainer;
 
         private readonly HttpClient client;
 
-        public InvocationController(IInvoker invoker, IInvocationObserver observer, IProxyContainer proxyContainer)
+        public InvocationController(IInvoker invoker, IProxyContainer proxyContainer)
         {
-            if (invoker == null)
-            {
-                throw new ArgumentNullException("invoker");
-            }
-            if (observer == null)
-            {
-                throw new ArgumentNullException("observer");
-            }
-            if (proxyContainer == null)
-            {
-                throw new ArgumentNullException("proxyContainer");
-            }
-
             this.invoker = invoker;
-            this.observer = observer;
             this.proxyContainer = proxyContainer;
 
             this.client = new HttpClient();
@@ -95,7 +81,6 @@ namespace CodeMercury.WebApi.Controllers
                 }
                 var uri = new Uri(invocationRequest.RequesterUri, Url.Route("PostInvocationCompletion", null));
                 var response = await client.PostAsJsonAsync(uri, completion, cancellationToken);
-                var error = await response.Content.ReadAsStringAsync();
                 response.EnsureSuccessStatusCode();
             });
         }
@@ -144,16 +129,18 @@ namespace CodeMercury.WebApi.Controllers
 
         private WebApi.Models.Argument ConvertResult(Method method, Argument result)
         {
+            if (result is TaskArgument)
+            {
+                return new WebApi.Models.TaskArgument
+                {
+                    Result = ConvertResult(method, result.CastTo<TaskArgument>().Result)
+                };
+            }
             if (result is ValueArgument)
             {
-                var resultType = method.ToMethodInfo().ReturnType;
-                if (resultType.IsSubclassOf(typeof(Task)))
-                {
-                    resultType = resultType.GetGenericArguments().Single();
-                }
                 return new WebApi.Models.ValueArgument
                 {
-                    Type = resultType,
+                    Type = method.UnwrappedReturnType,
                     Value = JToken.FromObject(result.CastTo<ValueArgument>().Value)
                 };   
             }
@@ -162,40 +149,6 @@ namespace CodeMercury.WebApi.Controllers
                 return new WebApi.Models.VoidArgument();
             }
             throw new CodeMercuryBugException();
-        }
-        
-        [Route("completions", Name = "PostInvocationCompletion")]
-        public void PostInvocationCompletion(WebApi.Models.InvocationCompletion completion)
-        {
-            if (completion.Status == WebApi.Models.InvocationStatus.RanToCompletion)
-            {
-                var result = completion.Result;
-                if (result is WebApi.Models.ValueArgument)
-                {
-                    var valueArgument = (WebApi.Models.ValueArgument)result;
-                    observer.OnResult(completion.InvocationId, new ValueArgument(valueArgument.Value.ToObject(valueArgument.Type)));
-                }
-                else if (result is WebApi.Models.VoidArgument)
-                {
-                    observer.OnResult(completion.InvocationId, new VoidArgument());
-                }
-                else
-                {
-                    throw new CodeMercuryBugException();
-                }
-            }
-            else if (completion.Status == WebApi.Models.InvocationStatus.Canceled)
-            {
-                observer.OnCancellation(completion.InvocationId);
-            }
-            else if (completion.Status == WebApi.Models.InvocationStatus.Faulted)
-            {
-                observer.OnException(completion.InvocationId, new InvocationException(completion.Exception.Content));
-            }
-            else
-            {
-                throw new CodeMercuryBugException();
-            }
         }
     }
 }

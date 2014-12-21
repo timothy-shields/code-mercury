@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CodeMercury.Components
+namespace CodeMercury.Services
 {
     /// <summary>
     /// Invokes <see cref="Invocation"/> instances.

@@ -59,6 +59,7 @@
     <Compile Include="ProxyArgument.cs" />
     <Compile Include="ServiceArgument.cs" />
     <Compile Include="StaticArgument.cs" />
+    <Compile Include="TaskArgument.cs" />
     <Compile Include="ValueArgument.cs" />
     <Compile Include="VoidArgument.cs" />
   </ItemGroup>

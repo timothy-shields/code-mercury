@@ -6,7 +6,7 @@ using System.Text;
 
 namespace CodeMercury.WebApi.Models
 {
-    [DataContract]
+    [DataContract(Name = "argument_kind")]
     public enum ArgumentKind
     {
         [EnumMember(Value = "proxy")]
@@ -17,6 +17,9 @@ namespace CodeMercury.WebApi.Models
 
         [EnumMember(Value = "static")]
         Static,
+
+        [EnumMember(Value = "task")]
+        Task,
 
         [EnumMember(Value = "value")]
         Value,

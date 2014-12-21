@@ -11,11 +11,11 @@ namespace CodeMercury.WebApi
     /// The Castle Windsor composition root.
     /// See: http://blog.ploeh.dk/2012/10/03/DependencyInjectioninASP.NETWebAPIwithCastleWindsor/
     /// </summary>
-    public class WindsorCompositionRoot : IHttpControllerActivator
+    public class WindsorHttpControllerActivator : IHttpControllerActivator
     {
         private readonly IWindsorContainer container;
 
-        public WindsorCompositionRoot(IWindsorContainer container)
+        public WindsorHttpControllerActivator(IWindsorContainer container)
         {
             this.container = container;
         }

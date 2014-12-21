@@ -8,9 +8,12 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.WebApi.Models
 {
-    public abstract class JsonCreationConverter<T> : JsonConverter
+    /// <summary>
+    /// See http://stackoverflow.com/a/21632292/1828879
+    /// </summary>
+    internal abstract class JsonCreationConverter<T> : JsonConverter
     {
-        protected abstract T Create(Type objectType, JObject obj);
+        protected abstract T Create(Type objectType, JObject jObject);
 
         public override bool CanConvert(Type objectType)
         {
@@ -19,15 +22,29 @@ namespace CodeMercury.WebApi.Models
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var obj = JObject.Load(reader);
-            var target = Create(objectType, obj);
-            serializer.Populate(obj.CreateReader(), target);
+            if (reader.TokenType == JsonToken.Null)
+            {
+                return null;
+            }
+            var jObject = JObject.Load(reader);
+            var target = Create(objectType, jObject);
+            var jObjectReader = jObject.CreateReader();
+            jObjectReader.Culture = reader.Culture;
+            jObjectReader.DateParseHandling = reader.DateParseHandling;
+            jObjectReader.DateTimeZoneHandling = reader.DateTimeZoneHandling;
+            jObjectReader.FloatParseHandling = reader.FloatParseHandling;
+            serializer.Populate(jObjectReader, target);
             return target;
+        }
+
+        public override bool CanWrite
+        {
+            get { return false; }
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            serializer.Serialize(writer, value);
+            throw new NotImplementedException();
         }
     }
 }

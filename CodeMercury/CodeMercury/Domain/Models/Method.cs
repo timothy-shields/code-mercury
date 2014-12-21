@@ -13,23 +13,57 @@ namespace CodeMercury.Domain.Models
         public string Name { get; private set; }
         public IReadOnlyCollection<Parameter> Parameters { get; private set; }
 
+        private readonly Lazy<MethodInfo> lazyMethodInfo;
+
+        public MethodInfo MethodInfo
+        {
+            get { return lazyMethodInfo.Value; }
+        }
+
+        public Type ReturnType
+        {
+            get { return MethodInfo.ReturnType; }
+        }
+
+        public bool ReturnsTask
+        {
+            get { return ReturnType.Equals(typeof(Task)) || ReturnType.IsSubclassOf(typeof(Task)); }
+        }
+
+        public Type UnwrappedReturnType
+        {
+            get
+            {
+                if (ReturnType.IsSubclassOf(typeof(Task)))
+                {
+                    return ReturnType.GetGenericArguments().Single();
+                }
+                if (ReturnType.Equals(typeof(Task)))
+                {
+                    return typeof(void);
+                }
+                return ReturnType;
+            }
+        }
+
         public Method(Type declaringType, string name, IEnumerable<Parameter> parameters)
         {
             this.DeclaringType = declaringType;
             this.Name = name;
             this.Parameters = parameters.ToList().AsReadOnly();
+
+            this.lazyMethodInfo = new Lazy<MethodInfo>(GetMethodInfo);
         }
 
-        public Method(MethodInfo methodInfo)
+        private MethodInfo GetMethodInfo()
         {
-            this.DeclaringType = methodInfo.DeclaringType;
-            this.Name = methodInfo.Name;
-            this.Parameters = methodInfo.GetParameters().Select(parameter => new Parameter(parameter)).ToList().AsReadOnly();
-        }
-
-        public MethodInfo ToMethodInfo()
-        {
-            return DeclaringType.GetMethod(Name, Parameters.Select(parameter => parameter.ParameterType).ToArray());
+            var bindingFlags =
+                BindingFlags.NonPublic |
+                BindingFlags.Public |
+                BindingFlags.Static |
+                BindingFlags.Instance;
+            var methodInfo = DeclaringType.GetMethod(Name, bindingFlags, null, Parameters.Select(parameter => parameter.ParameterType).ToArray(), null);
+            return methodInfo;
         }
     }
 }

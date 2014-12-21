@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CodeMercury.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,7 +21,10 @@ namespace CodeMercury.Components
         /// <param name="serviceInstance">The service instance.</param>
         public void Register(Guid serviceId, object serviceInstance)
         {
-            services.Add(serviceId, serviceInstance);
+            lock (services)
+            {
+                services.Add(serviceId, serviceInstance);
+            }
         }
 
         /// <summary>
@@ -30,8 +34,19 @@ namespace CodeMercury.Components
         /// <returns>The service instance.</returns>
         public object Resolve(Guid serviceId)
         {
-            var service = services[serviceId];
-            return service;
+            lock (services)
+            {
+                var service = services[serviceId];
+                return service;
+            }
+        }
+
+        public void Release(Guid serviceId)
+        {
+            lock (services)
+            {
+                services.Remove(serviceId);
+            }
         }
     }
 }

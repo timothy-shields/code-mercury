@@ -7,14 +7,14 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CodeMercury.Components
+namespace CodeMercury.Services
 {
     public static class InvokerExtensions
     {
         public static async Task<TResult> InvokeAsync<TResult>(this IInvoker invoker, Expression<Func<Task<TResult>>> expression)
         {
             var resultArgument = await invoker.InvokeAsync((MethodCallExpression)expression.Body).ConfigureAwait(false);
-            var result = resultArgument.CastTo<ValueArgument>().Value.CastTo<TResult>();
+            var result = resultArgument.CastTo<TaskArgument>().Result.CastTo<ValueArgument>().Value.CastTo<TResult>();
             return result;
         }
 
@@ -41,7 +41,7 @@ namespace CodeMercury.Components
         {
             if (expression.Object == null)
             {
-                return null;
+                return new StaticArgument();
             }
             return new ValueArgument(expression.Object);
         }

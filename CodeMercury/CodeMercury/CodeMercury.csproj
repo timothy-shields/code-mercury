@@ -93,20 +93,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BoolString.cs" />
-    <Compile Include="Components\CodeMercuryBugException.cs" />
+    <Compile Include="CodeMercuryBugException.cs" />
     <Compile Include="Components\CompositeInvoker.cs" />
     <Compile Include="Components\ProxyActivator.cs" />
     <Compile Include="Components\ProxyContainer.cs" />
-    <Compile Include="Components\HttpInvoker.cs" />
-    <Compile Include="Components\IInvocationObserver.cs" />
-    <Compile Include="Components\IInvoker.cs" />
-    <Compile Include="Components\InvokerExtensions.cs" />
-    <Compile Include="Components\IProxy.cs" />
-    <Compile Include="Components\IServiceResolver.cs" />
-    <Compile Include="Components\IProxyActivator.cs" />
-    <Compile Include="Components\IProxyContainer.cs" />
-    <Compile Include="Components\IProxyResolver.cs" />
-    <Compile Include="Components\IServiceContainer.cs" />
+    <Compile Include="Domain\Models\TaskArgument.cs" />
+    <Compile Include="Services\IInvocationObserver.cs" />
+    <Compile Include="Services\IInvoker.cs" />
+    <Compile Include="Services\InvokerExtensions.cs" />
+    <Compile Include="Services\IProxy.cs" />
+    <Compile Include="Services\IServiceResolver.cs" />
+    <Compile Include="Services\IProxyActivator.cs" />
+    <Compile Include="Services\IProxyContainer.cs" />
+    <Compile Include="Services\IProxyResolver.cs" />
+    <Compile Include="Services\IServiceContainer.cs" />
     <Compile Include="Components\LocalInvoker.cs" />
     <Compile Include="Components\ProxyInvoker.cs" />
     <Compile Include="Components\ServiceContainer.cs" />
@@ -138,6 +138,7 @@
       <Name>CodeMercury.WebApi.Models</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

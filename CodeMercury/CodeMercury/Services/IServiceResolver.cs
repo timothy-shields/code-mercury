@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CodeMercury.Components
+namespace CodeMercury.Services
 {
     /// <summary>
     /// Resolves local service instances.

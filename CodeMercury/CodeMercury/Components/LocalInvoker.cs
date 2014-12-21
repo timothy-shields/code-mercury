@@ -1,4 +1,5 @@
 ﻿using CodeMercury.Domain.Models;
+using CodeMercury.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,22 +31,22 @@ namespace CodeMercury.Components
 
         public async Task<Argument> InvokeAsync(Invocation invocation)
         {
-            var method = invocation.Method.ToMethodInfo();
+            var method = invocation.Method;
             var @object = ResolveObject(invocation.Object);
             var arguments = invocation.Arguments.Select(ResolveArgument).ToArray();
-            var result = Invoke(@object, method, arguments);
+            var result = Invoke(@object, method.MethodInfo, arguments);
             return await CreateResultAsync(method, result);
         }
 
         private object ResolveObject(Argument @object)
         {
-            if (@object == null)
-            {
-                return null;
-            }
             if (@object is ServiceArgument)
             {
                 return serviceResolver.Resolve(@object.CastTo<ServiceArgument>().ServiceId);
+            }
+            if (@object is StaticArgument)
+            {
+                return null;
             }
             throw new CodeMercuryBugException();
         }
@@ -75,14 +76,14 @@ namespace CodeMercury.Components
             throw new CodeMercuryBugException();
         }
 
-        private static async Task<Argument> CreateResultAsync(MethodInfo method, object result)
+        private static async Task<Argument> CreateResultAsync(Method method, object result)
         {
             if (method.ReturnType.IsSubclassOf(typeof(Task)))
             {
                 try
                 {
                     object value = await ((dynamic)result).ConfigureAwait(false);
-                    return new ValueArgument(value);
+                    return new TaskArgument(new ValueArgument(value));
                 }
                 catch (TargetInvocationException exception)
                 {
@@ -93,13 +94,17 @@ namespace CodeMercury.Components
             {
                 try
                 {
-                    await ((dynamic)result).ConfigureAwait(false);
-                    return new VoidArgument();
+                    await ((Task)result).ConfigureAwait(false);
+                    return new TaskArgument(new VoidArgument());
                 }
                 catch (TargetInvocationException exception)
                 {
                     throw new InvocationException(exception.InnerException);
                 }
+            }
+            if (method.ReturnType.Equals(typeof(void)))
+            {
+                return new VoidArgument();
             }
             return new ValueArgument(result);
         }

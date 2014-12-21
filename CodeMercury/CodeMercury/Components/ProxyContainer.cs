@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CodeMercury.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,22 +13,14 @@ namespace CodeMercury.Components
     public class ProxyContainer : IProxyContainer, IProxyResolver
     {
         private readonly IProxyActivator proxyActivator;
-        private readonly IServiceContainer serviceContainer;
-        private readonly Uri requesterUri;
-        private readonly Uri serverUri;
+        private readonly IInvoker invoker;
 
         private readonly Dictionary<Guid, Type> serviceTypes = new Dictionary<Guid, Type>();
 
-        public ProxyContainer(
-            IProxyActivator proxyActivator,
-            IServiceContainer serviceContainer,
-            Uri requesterUri,
-            Uri serverUri)
+        public ProxyContainer(IProxyActivator proxyActivator, IInvoker invoker)
         {
             this.proxyActivator = proxyActivator;
-            this.serviceContainer = serviceContainer;
-            this.requesterUri = requesterUri;
-            this.serverUri = serverUri;
+            this.invoker = invoker;
         }
 
         public void Register(Guid serviceId, Type serviceType)
@@ -42,9 +35,14 @@ namespace CodeMercury.Components
         public IProxy Resolve(Guid serviceId)
         {
             var proxyType = serviceTypes[serviceId];
-            var invoker = new ProxyInvoker(new HttpInvoker(requesterUri, serverUri, serviceContainer), serviceId);
-            var proxy = proxyActivator.Create(proxyType, invoker);
+            var proxyInvoker = new ProxyInvoker(invoker, serviceId);
+            var proxy = proxyActivator.Create(proxyType, proxyInvoker);
             return proxy;
+        }
+
+        public void Release(Guid serviceId)
+        {
+            serviceTypes.Remove(serviceId);
         }
     }
 }

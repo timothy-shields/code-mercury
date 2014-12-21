@@ -11,6 +11,9 @@ using System.Net.Http;
 using Nito.AsyncEx.Synchronous;
 using System.Threading.Tasks;
 using Example;
+using CodeMercury.Services;
+using CodeMercury.WebApi.Components;
+using Newtonsoft.Json.Converters;
 
 namespace CodeMercury.WebApi
 {
@@ -24,7 +27,7 @@ namespace CodeMercury.WebApi
 
                 var port = 9090;// int.Parse(args[0]);
                 var url = string.Format("http://localhost:{0}/", port);
-                var activator = new WindsorCompositionRoot(container);
+                var activator = new WindsorHttpControllerActivator(container);
                 var startup = new Startup(activator);
                 using (WebApp.Start(url, startup.Configuration))
                 {

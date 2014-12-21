@@ -8,32 +8,36 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.WebApi.Models
 {
-    public class ArgumentJsonConverter : JsonCreationConverter<Argument>
+    internal class ArgumentJsonConverter : JsonCreationConverter<Argument>
     {
-        protected override Argument Create(Type objectType, JObject obj)
+        protected override Argument Create(Type objectType, JObject jObject)
         {
-            var kind = obj["kind"].ToObject<ArgumentKind>();
-            if (kind == ArgumentKind.Proxy)
+            ArgumentKind kind;
+            try
             {
-                return new ProxyArgument();
+                kind = jObject["kind"].ToObject<ArgumentKind>();
             }
-            if (kind == ArgumentKind.Service)
+            catch (Exception e)
             {
-                return new ServiceArgument();
+                throw new JsonException(@"An Argument must have a ""kind"" property with an ArgumentKind value.", e);
             }
-            if (kind == ArgumentKind.Static)
+            switch (kind)
             {
-                return new StaticArgument();
+                case ArgumentKind.Proxy:
+                    return new ProxyArgument();
+                case ArgumentKind.Service:
+                    return new ServiceArgument();
+                case ArgumentKind.Static:
+                    return new StaticArgument();
+                case ArgumentKind.Task:
+                    return new TaskArgument();
+                case ArgumentKind.Value:
+                    return new ValueArgument();
+                case ArgumentKind.Void:
+                    return new VoidArgument();
+                default:
+                    throw new JsonException("Unhandled ArgumentKind: " + kind);
             }
-            if (kind == ArgumentKind.Value)
-            {
-                return new ValueArgument();
-            }
-            if (kind == ArgumentKind.Void)
-            {
-                return new VoidArgument();
-            }
-            throw new Exception();
         }
     }
 }

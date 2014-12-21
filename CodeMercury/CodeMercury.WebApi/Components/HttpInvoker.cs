@@ -1,5 +1,6 @@
 ﻿using CodeMercury.Domain.Models;
 using CodeMercury.Expressions;
+using CodeMercury.Services;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
@@ -14,13 +15,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CodeMercury.Components
+namespace CodeMercury.WebApi.Components
 {
     public class HttpInvoker : IInvoker, IInvocationObserver
     {
         private readonly Uri requesterUri;
         private readonly HttpClient client;
-        private readonly IServiceContainer proxyableContainer;
+        private readonly IServiceContainer serviceContainer;
         private readonly ConcurrentDictionary<Guid, InvocationContext> contexts = new ConcurrentDictionary<Guid, InvocationContext>();
 
         private class InvocationContext : IDisposable
@@ -64,11 +65,11 @@ namespace CodeMercury.Components
             }
         }
 
-        public HttpInvoker(Uri requesterUri, Uri serverUri, IServiceContainer proxyableContainer)
+        public HttpInvoker(Uri requesterUri, Uri serverUri, IServiceContainer serviceContainer)
         {
             this.requesterUri = requesterUri;
             this.client = new HttpClient { BaseAddress = serverUri };
-            this.proxyableContainer = proxyableContainer;
+            this.serviceContainer = serviceContainer;
         }
 
         public async Task<Argument> InvokeAsync(Invocation invocation)
@@ -132,33 +133,25 @@ namespace CodeMercury.Components
         {
             if (argument is ValueArgument)
             {
-                return ConvertValueArgument((ValueArgument)argument);
-            }
-            else
-            {
-                throw new CodeMercuryBugException();
-            }
-        }
-
-        private WebApi.Models.Argument ConvertValueArgument(ValueArgument valueArgument)
-        {
-            var value = valueArgument.Value;
-            if (IsProxyable(value))
-            {
-                var proxyId = Guid.NewGuid();
-                proxyableContainer.Register(proxyId, value);
-                return new WebApi.Models.ProxyArgument
+                var value = argument.CastTo<ValueArgument>().Value;
+                if (IsProxyable(value))
                 {
-                    ServiceId = proxyId
-                };
-            }
-            else
-            {
-                return new WebApi.Models.ValueArgument
+                    var proxyId = Guid.NewGuid();
+                    serviceContainer.Register(proxyId, value);
+                    return new WebApi.Models.ProxyArgument
+                    {
+                        ServiceId = proxyId
+                    };
+                }
+                else
                 {
-                    Value = JToken.FromObject(value)
-                };
+                    return new WebApi.Models.ValueArgument
+                    {
+                        Value = JToken.FromObject(value)
+                    };
+                }
             }
+            throw new CodeMercuryBugException();
         }
 
         private static bool IsProxyable(object value)
