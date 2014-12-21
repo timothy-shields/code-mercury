@@ -11,5 +11,9 @@ namespace CodeMercury.Domain.Models
     /// </summary>
     public class StaticArgument : Argument
     {
+        public override string ToString()
+        {
+            return "Static";
+        }
     }
 }

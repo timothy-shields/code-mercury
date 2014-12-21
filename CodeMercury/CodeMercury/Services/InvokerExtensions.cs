@@ -21,10 +21,20 @@ namespace CodeMercury.Services
         public static async Task InvokeAsync(this IInvoker invoker, Expression<Func<Task>> expression)
         {
             var resultArgument = await invoker.InvokeAsync((MethodCallExpression)expression.Body).ConfigureAwait(false);
-            if (!(resultArgument is VoidArgument))
-            {
-                throw new CodeMercuryBugException();
-            }
+            var result = resultArgument.CastTo<TaskArgument>().Result.CastTo<VoidArgument>();
+        }
+
+        public static async Task<TResult> InvokeAsync<TResult>(this IInvoker invoker, Expression<Func<TResult>> expression)
+        {
+            var resultArgument = await invoker.InvokeAsync((MethodCallExpression)expression.Body).ConfigureAwait(false);
+            var result = resultArgument.CastTo<ValueArgument>().Value.CastTo<TResult>();
+            return result;
+        }
+
+        public static async Task InvokeAsync(this IInvoker invoker, Expression<Action> expression)
+        {
+            var resultArgument = await invoker.InvokeAsync((MethodCallExpression)expression.Body).ConfigureAwait(false);
+            var result = resultArgument.CastTo<VoidArgument>();
         }
 
         public static async Task<Argument> InvokeAsync(this IInvoker invoker, MethodCallExpression expression)
@@ -51,7 +61,7 @@ namespace CodeMercury.Services
             return new Method(
                 expression.Method.DeclaringType,
                 expression.Method.Name,
-                expression.Method.GetParameters().Select(parameter => new Parameter(parameter)));
+                expression.Method.GetParameters().Select(parameter => new Parameter(parameter)).ToList().AsReadOnly());
         }
 
         private static IEnumerable<ValueArgument> GetArguments(MethodCallExpression expression)

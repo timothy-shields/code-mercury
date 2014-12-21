@@ -33,5 +33,10 @@ namespace CodeMercury.Domain.Models
             this.Method = method;
             this.Arguments = arguments.ToList().AsReadOnly();
         }
+
+        public override string ToString()
+        {
+            return string.Format("Invocation({0}, {1}.{2}({3}))", Object, Method.Name, string.Join(", ", Arguments));
+        }
     }
 }

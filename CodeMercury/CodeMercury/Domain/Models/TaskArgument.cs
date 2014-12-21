@@ -19,5 +19,10 @@ namespace CodeMercury.Domain.Models
 
             this.Result = result;
         }
+
+        public override string ToString()
+        {
+            return string.Format("Task({0})", Result);
+        }
     }
 }

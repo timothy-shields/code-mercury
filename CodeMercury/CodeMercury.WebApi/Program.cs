@@ -34,7 +34,8 @@ namespace CodeMercury.WebApi
                     var invoker = container.Resolve<HttpInvoker>();
                     
                     var name = "Timothy";
-                    var task = invoker.InvokeAsync(() => BuildNameAsync(name));
+                    //var task = invoker.InvokeAsync(() => BuildNameAsync(name));
+                    var task = Test(invoker, name);
                     var result = task.WaitAndUnwrapException();
                     Console.WriteLine(result);
 
@@ -60,7 +61,7 @@ namespace CodeMercury.WebApi
             var gizmoCache = new LocalGizmoCache();
             var gizmoId = 7;
             await gizmoCache.PutGizmoAsync(new Gizmo(gizmoId, "You have unread messages.", true));
-            await invoker.InvokeAsync(() => Runtime.MakeGizmoFriendly(7, "Timothy", gizmoCache));
+            await invoker.InvokeAsync(() => Runtime.MakeGizmoFriendly(gizmoId, username, gizmoCache));
             var gizmo = await gizmoCache.GetGizmoAsync(gizmoId);
             return gizmo.Content;
         }

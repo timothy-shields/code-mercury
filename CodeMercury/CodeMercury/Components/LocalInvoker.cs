@@ -31,8 +31,8 @@ namespace CodeMercury.Components
 
         public async Task<Argument> InvokeAsync(Invocation invocation)
         {
-            var method = invocation.Method;
             var @object = ResolveObject(invocation.Object);
+            var method = ResolveMethod(invocation.Method, @object);   
             var arguments = invocation.Arguments.Select(ResolveArgument).ToArray();
             var result = Invoke(@object, method.MethodInfo, arguments);
             return await CreateResultAsync(method, result);
@@ -49,6 +49,15 @@ namespace CodeMercury.Components
                 return null;
             }
             throw new CodeMercuryBugException();
+        }
+
+        private Method ResolveMethod(Method method, object @object)
+        {
+            if (@object == null || @object.GetType() == method.DeclaringType)
+            {
+                return method;
+            }
+            return method.WithDeclaringType(@object.GetType());
         }
 
         private static object Invoke(object @object, MethodInfo method, object[] arguments)

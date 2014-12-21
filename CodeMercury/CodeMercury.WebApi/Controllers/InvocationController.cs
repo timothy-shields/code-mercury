@@ -38,58 +38,68 @@ namespace CodeMercury.WebApi.Controllers
             BackgroundTaskManager.Run(async () =>
             {
                 var cancellationToken = BackgroundTaskManager.Shutdown;
-
-                var @object = ConvertObject(invocationRequest.Object);
-                var method = ConvertMethod(invocationRequest.Method);
-                var arguments = ConvertArguments(invocationRequest);
-                var invocation = new Invocation(@object, method, arguments);
-                
-                WebApi.Models.InvocationCompletion completion = null;
-                Argument resultArgument = null;
                 try
                 {
-                    resultArgument = await invoker.InvokeAsync(invocation);
+                    await BeginInvoke(invocationRequest, cancellationToken);
                 }
-                catch (OperationCanceledException)
+                catch (Exception e)
                 {
-                    completion = new WebApi.Models.InvocationCompletion
-                    {
-                        InvocationId = invocationRequest.InvocationId,
-                        Status = WebApi.Models.InvocationStatus.Canceled
-                    };
                 }
-                catch (Exception exception)
-                {
-                    completion = new WebApi.Models.InvocationCompletion
-                    {
-                        InvocationId = invocationRequest.InvocationId,
-                        Status = WebApi.Models.InvocationStatus.Faulted,
-                        Exception = new WebApi.Models.InvocationException
-                        {
-                            Content = exception.ToString()
-                        }
-                    };
-                }
-                if (completion == null)
-                {
-                    completion = new WebApi.Models.InvocationCompletion
-                    {
-                        InvocationId = invocationRequest.InvocationId,
-                        Status = WebApi.Models.InvocationStatus.RanToCompletion,
-                        Result = ConvertResult(method, resultArgument)
-                    };
-                }
-                var uri = new Uri(invocationRequest.RequesterUri, Url.Route("PostInvocationCompletion", null));
-                var response = await client.PostAsJsonAsync(uri, completion, cancellationToken);
-                response.EnsureSuccessStatusCode();
             });
+        }
+
+        private async Task BeginInvoke(WebApi.Models.InvocationRequest invocationRequest, CancellationToken cancellationToken)
+        {
+            var @object = ConvertObject(invocationRequest.Object);
+            var method = ConvertMethod(invocationRequest.Method);
+            var arguments = ConvertArguments(invocationRequest);
+            var invocation = new Invocation(@object, method, arguments);
+
+            WebApi.Models.InvocationCompletion completion = null;
+            Argument resultArgument = null;
+            try
+            {
+                resultArgument = await invoker.InvokeAsync(invocation);
+            }
+            catch (OperationCanceledException)
+            {
+                completion = new WebApi.Models.InvocationCompletion
+                {
+                    InvocationId = invocationRequest.InvocationId,
+                    Status = WebApi.Models.InvocationStatus.Canceled
+                };
+            }
+            catch (Exception exception)
+            {
+                completion = new WebApi.Models.InvocationCompletion
+                {
+                    InvocationId = invocationRequest.InvocationId,
+                    Status = WebApi.Models.InvocationStatus.Faulted,
+                    Exception = new WebApi.Models.InvocationException
+                    {
+                        Content = exception.ToString()
+                    }
+                };
+            }
+            if (completion == null)
+            {
+                completion = new WebApi.Models.InvocationCompletion
+                {
+                    InvocationId = invocationRequest.InvocationId,
+                    Status = WebApi.Models.InvocationStatus.RanToCompletion,
+                    Result = ConvertResult(method, resultArgument)
+                };
+            }
+            var uri = new Uri(invocationRequest.RequesterUri, Url.Route("PostInvocationCompletion", null));
+            var response = await client.PostAsJsonAsync(uri, completion, cancellationToken);
+            response.EnsureSuccessStatusCode();
         }
 
         private Argument ConvertObject(WebApi.Models.Argument @object)
         {
             if (@object is WebApi.Models.ServiceArgument)
             {
-                return new ServiceArgument(@object.CastTo<ServiceArgument>().ServiceId);
+                return new ServiceArgument(@object.CastTo<WebApi.Models.ServiceArgument>().ServiceId);
             }
             if (@object is WebApi.Models.StaticArgument)
             {
@@ -103,7 +113,7 @@ namespace CodeMercury.WebApi.Controllers
             return new Method(
                 method.DeclaringType,
                 method.Name,
-                method.Parameters.Select(parameter => new Parameter(parameter.ParameterType, parameter.Name)));
+                method.Parameters.Select(parameter => new Parameter(parameter.ParameterType, parameter.Name)).ToList().AsReadOnly());
         }
 
         private IEnumerable<Argument> ConvertArguments(WebApi.Models.InvocationRequest invocationRequest)

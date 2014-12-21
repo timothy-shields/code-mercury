@@ -82,7 +82,8 @@ namespace CodeMercury.WebApi.Components
                     InvocationId = context.Key,
                     Object = ConvertObject(invocation.Object),
                     Method = ConvertMethod(invocation.Method),
-                    Arguments = invocation.Arguments.Select(ConvertArgument).ToList()
+                    Arguments = Enumerable.Zip(invocation.Method.Parameters, invocation.Arguments,
+                        (parameter, argument) => ConvertArgument(parameter, argument)).ToList()
                 };
                 var response = await client.PostAsJsonAsync("invocations", request);
                 response.EnsureSuccessStatusCode();
@@ -92,11 +93,11 @@ namespace CodeMercury.WebApi.Components
 
         private static WebApi.Models.Argument ConvertObject(Argument @object)
         {
-            if (@object is ProxyArgument)
+            if (@object is ServiceArgument)
             {
-                return new WebApi.Models.ProxyArgument
+                return new WebApi.Models.ServiceArgument
                 {
-                    ServiceId = @object.CastTo<ProxyArgument>().ServiceId
+                    ServiceId = @object.CastTo<ServiceArgument>().ServiceId
                 };
             }
             if (@object is StaticArgument)
@@ -129,12 +130,12 @@ namespace CodeMercury.WebApi.Components
             };
         }
 
-        private WebApi.Models.Argument ConvertArgument(Argument argument)
+        private WebApi.Models.Argument ConvertArgument(Parameter parameter, Argument argument)
         {
             if (argument is ValueArgument)
             {
                 var value = argument.CastTo<ValueArgument>().Value;
-                if (IsProxyable(value))
+                if (IsProxyable(parameter.ParameterType))
                 {
                     var proxyId = Guid.NewGuid();
                     serviceContainer.Register(proxyId, value);
@@ -154,10 +155,9 @@ namespace CodeMercury.WebApi.Components
             throw new CodeMercuryBugException();
         }
 
-        private static bool IsProxyable(object value)
+        private static bool IsProxyable(Type parameterType)
         {
-            return value != null && value.GetType().GetInterfaces()
-                .Any(interfaceType => interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IProxy<>));
+            return parameterType.IsInterface;
         }
 
         private InvocationContext CreateContext(Invocation invocation)

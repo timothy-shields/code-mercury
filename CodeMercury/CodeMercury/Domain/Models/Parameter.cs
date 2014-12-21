@@ -23,5 +23,10 @@ namespace CodeMercury.Domain.Models
             this.ParameterType = parameterInfo.ParameterType;
             this.Name = parameterInfo.Name;
         }
+
+        public override string ToString()
+        {
+            return string.Format("Parameter({0} {1})", ParameterType.Name, Name);
+        }
     }
 }

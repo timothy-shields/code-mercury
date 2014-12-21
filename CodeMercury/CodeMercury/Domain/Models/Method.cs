@@ -46,13 +46,18 @@ namespace CodeMercury.Domain.Models
             }
         }
 
-        public Method(Type declaringType, string name, IEnumerable<Parameter> parameters)
+        public Method(Type declaringType, string name, IReadOnlyCollection<Parameter> parameters)
         {
             this.DeclaringType = declaringType;
             this.Name = name;
-            this.Parameters = parameters.ToList().AsReadOnly();
+            this.Parameters = parameters;
 
             this.lazyMethodInfo = new Lazy<MethodInfo>(GetMethodInfo);
+        }
+
+        public Method WithDeclaringType(Type declaringType)
+        {
+            return new Method(declaringType, Name, Parameters);
         }
 
         private MethodInfo GetMethodInfo()
@@ -64,6 +69,11 @@ namespace CodeMercury.Domain.Models
                 BindingFlags.Instance;
             var methodInfo = DeclaringType.GetMethod(Name, bindingFlags, null, Parameters.Select(parameter => parameter.ParameterType).ToArray(), null);
             return methodInfo;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("Method({0}.{1}({2}))", DeclaringType.Name, Name, string.Join(", ", Parameters));
         }
     }
 }

@@ -19,5 +19,10 @@ namespace CodeMercury.Domain.Models
         {
             this.ServiceId = serviceId;
         }
+
+        public override string ToString()
+        {
+            return string.Format("Proxy({0})", ServiceId);
+        }
     }
 }

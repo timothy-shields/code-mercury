@@ -11,5 +11,9 @@ namespace CodeMercury.Domain.Models
     /// </summary>
     public class VoidArgument : Argument
     {
+        public override string ToString()
+        {
+            return "Void";
+        }
     }
 }
