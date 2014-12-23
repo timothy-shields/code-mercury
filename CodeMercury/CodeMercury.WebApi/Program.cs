@@ -55,7 +55,7 @@ namespace CodeMercury.WebApi
         /// </summary>
         /// <param name="invoker">The invoker supplied by code mercury.</param>
         /// <param name="username">The username to use in the greeting.</param>
-        /// <returns>The content "Hello, Timothy! You have unread messages."</returns>
+        /// <returns>The content "Hello, {username}! You have unread messages."</returns>
         public static async Task<string> Test(IInvoker invoker, string username)
         {
             var gizmoCache = new LocalGizmoCache();

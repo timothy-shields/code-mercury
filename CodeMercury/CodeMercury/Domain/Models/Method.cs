@@ -25,27 +25,6 @@ namespace CodeMercury.Domain.Models
             get { return MethodInfo.ReturnType; }
         }
 
-        public bool ReturnsTask
-        {
-            get { return ReturnType.Equals(typeof(Task)) || ReturnType.IsSubclassOf(typeof(Task)); }
-        }
-
-        public Type UnwrappedReturnType
-        {
-            get
-            {
-                if (ReturnType.IsSubclassOf(typeof(Task)))
-                {
-                    return ReturnType.GetGenericArguments().Single();
-                }
-                if (ReturnType.Equals(typeof(Task)))
-                {
-                    return typeof(void);
-                }
-                return ReturnType;
-            }
-        }
-
         public Method(Type declaringType, string name, IReadOnlyCollection<Parameter> parameters)
         {
             this.DeclaringType = declaringType;

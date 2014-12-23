@@ -87,7 +87,7 @@ namespace CodeMercury.WebApi.Controllers
                 {
                     InvocationId = invocationRequest.InvocationId,
                     Status = WebApi.Models.InvocationStatus.RanToCompletion,
-                    Result = ConvertResult(method, resultArgument)
+                    Result = ConvertResult(method.ReturnType, resultArgument)
                 };
             }
             var uri = new Uri(invocationRequest.RequesterUri, Url.Route("PostInvocationCompletion", null));
@@ -137,22 +137,35 @@ namespace CodeMercury.WebApi.Controllers
                 });
         }
 
-        private WebApi.Models.Argument ConvertResult(Method method, Argument result)
+        private WebApi.Models.Argument ConvertResult(Type type, Argument result)
         {
             if (result is TaskArgument)
             {
+                Type resultType;
+                if (type.IsSubclassOf(typeof(Task)))
+                {
+                    resultType = type.GetGenericArguments().Single();
+                }
+                else if (type.Equals(typeof(Task)))
+                {
+                    resultType = typeof(void);
+                }
+                else
+                {
+                    throw new CodeMercuryBugException();
+                }
                 return new WebApi.Models.TaskArgument
                 {
-                    Result = ConvertResult(method, result.CastTo<TaskArgument>().Result)
+                    Result = ConvertResult(resultType, result.CastTo<TaskArgument>().Result)
                 };
             }
             if (result is ValueArgument)
             {
                 return new WebApi.Models.ValueArgument
                 {
-                    Type = method.UnwrappedReturnType,
+                    Type = type,
                     Value = JToken.FromObject(result.CastTo<ValueArgument>().Value)
-                };   
+                };
             }
             if (result is VoidArgument)
             {

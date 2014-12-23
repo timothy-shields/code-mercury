@@ -35,7 +35,7 @@ namespace CodeMercury.Components
             var method = ResolveMethod(invocation.Method, @object);   
             var arguments = invocation.Arguments.Select(ResolveArgument).ToArray();
             var result = Invoke(@object, method.MethodInfo, arguments);
-            return await CreateResultAsync(method, result);
+            return await CreateResultAsync(method.ReturnType, result);
         }
 
         private object ResolveObject(Argument @object)
@@ -60,18 +60,6 @@ namespace CodeMercury.Components
             return method.WithDeclaringType(@object.GetType());
         }
 
-        private static object Invoke(object @object, MethodInfo method, object[] arguments)
-        {
-            try
-            {
-                return method.Invoke(@object, arguments);
-            }
-            catch (TargetInvocationException exception)
-            {
-                throw new InvocationException(exception.InnerException);
-            }
-        }
-
         private object ResolveArgument(Argument argument)
         {
             if (argument is ProxyArgument)
@@ -85,33 +73,48 @@ namespace CodeMercury.Components
             throw new CodeMercuryBugException();
         }
 
-        private static async Task<Argument> CreateResultAsync(Method method, object result)
+        private static object Invoke(object @object, MethodInfo method, object[] arguments)
         {
-            if (method.ReturnType.IsSubclassOf(typeof(Task)))
+            try
             {
+                return method.Invoke(@object, arguments);
+            }
+            catch (TargetInvocationException exception)
+            {
+                throw new InvocationException(exception.InnerException);
+            }
+        }
+
+        private static async Task<Argument> CreateResultAsync(Type type, object result)
+        {
+            if (type.IsSubclassOf(typeof(Task)))
+            {
+                var resultType = type.GetGenericArguments().Single();
+                object value;
                 try
                 {
-                    object value = await ((dynamic)result).ConfigureAwait(false);
-                    return new TaskArgument(new ValueArgument(value));
+                    value = await ((dynamic)result).ConfigureAwait(false);
                 }
                 catch (TargetInvocationException exception)
                 {
                     throw new InvocationException(exception.InnerException);
                 }
+                var taskResult = await CreateResultAsync(resultType, value).ConfigureAwait(false);
+                return new TaskArgument(taskResult);
             }
-            if (method.ReturnType.Equals(typeof(Task)))
+            if (type.Equals(typeof(Task)))
             {
                 try
                 {
-                    await ((Task)result).ConfigureAwait(false);
-                    return new TaskArgument(new VoidArgument());
+                    await result.CastTo<Task>().ConfigureAwait(false);
                 }
                 catch (TargetInvocationException exception)
                 {
                     throw new InvocationException(exception.InnerException);
                 }
+                return new TaskArgument(new VoidArgument());
             }
-            if (method.ReturnType.Equals(typeof(void)))
+            if (type.Equals(typeof(void)))
             {
                 return new VoidArgument();
             }
