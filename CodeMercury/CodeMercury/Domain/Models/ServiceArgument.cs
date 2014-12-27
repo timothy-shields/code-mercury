@@ -13,6 +13,9 @@ namespace CodeMercury.Domain.Models
     /// </summary>
     public class ServiceArgument : Argument
     {
+        /// <summary>
+        /// The ID of the service.
+        /// </summary>
         public Guid ServiceId { get; private set; }
 
         public ServiceArgument(Guid serviceId)

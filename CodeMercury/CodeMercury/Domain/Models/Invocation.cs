@@ -8,10 +8,24 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.Domain.Models
 {
+    /// <summary>
+    /// Represents an invocation of a method.
+    /// </summary>
     public class Invocation
     {
+        /// <summary>
+        /// The static type or instance the method is being called on.
+        /// </summary>
         public Argument Object { get; private set; }
+        
+        /// <summary>
+        /// The method being invoked.
+        /// </summary>
         public Method Method { get; private set; }
+
+        /// <summary>
+        /// The arguments to pass to the method when invoking it.
+        /// </summary>
         public IReadOnlyCollection<Argument> Arguments { get; private set; }
 
         public Invocation(Argument @object, Method method, IEnumerable<Argument> arguments)

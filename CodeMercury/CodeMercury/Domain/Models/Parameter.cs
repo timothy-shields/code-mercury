@@ -7,9 +7,19 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.Domain.Models
 {
+    /// <summary>
+    /// Represents a method parameter.
+    /// </summary>
     public class Parameter
     {
+        /// <summary>
+        /// The parameter type.
+        /// </summary>
         public Type ParameterType { get; private set; }
+        
+        /// <summary>
+        /// The parameter name.
+        /// </summary>
         public string Name { get; private set; }
 
         public Parameter(Type parameterType, string name)

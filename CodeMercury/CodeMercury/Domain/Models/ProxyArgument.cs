@@ -13,6 +13,9 @@ namespace CodeMercury.Domain.Models
     /// </summary>
     public class ProxyArgument : Argument
     {
+        /// <summary>
+        /// The ID of the service being proxied.
+        /// </summary>
         public Guid ServiceId { get; private set; }
 
         public ProxyArgument(Guid serviceId)

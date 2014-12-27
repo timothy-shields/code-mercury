@@ -7,19 +7,39 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.Domain.Models
 {
+    /// <summary>
+    /// Represents a method.
+    /// </summary>
     public class Method
     {
+        /// <summary>
+        /// The type that declares the method.
+        /// </summary>
         public Type DeclaringType { get; private set; }
+
+        /// <summary>
+        /// The name of the method.
+        /// </summary>
         public string Name { get; private set; }
+
+        /// <summary>
+        /// The parameters of the method.
+        /// </summary>
         public IReadOnlyCollection<Parameter> Parameters { get; private set; }
 
         private readonly Lazy<MethodInfo> lazyMethodInfo;
 
+        /// <summary>
+        /// The MethodInfo for this method.
+        /// </summary>
         public MethodInfo MethodInfo
         {
             get { return lazyMethodInfo.Value; }
         }
 
+        /// <summary>
+        /// The return type of this method.
+        /// </summary>
         public Type ReturnType
         {
             get { return MethodInfo.ReturnType; }
@@ -34,6 +54,11 @@ namespace CodeMercury.Domain.Models
             this.lazyMethodInfo = new Lazy<MethodInfo>(GetMethodInfo);
         }
 
+        /// <summary>
+        /// Get another method that differs from this one in only its declaring type.
+        /// </summary>
+        /// <param name="declaringType">The type declaring the other method.</param>
+        /// <returns>The other method.</returns>
         public Method WithDeclaringType(Type declaringType)
         {
             return new Method(declaringType, Name, Parameters);
