@@ -33,22 +33,7 @@ namespace CodeMercury.WebApi.Controllers
         }
 
         [Route("invocations")]
-        public void PostInvocation(WebApi.Models.InvocationRequest invocationRequest)
-        {
-            BackgroundTaskManager.Run(async () =>
-            {
-                var cancellationToken = BackgroundTaskManager.Shutdown;
-                try
-                {
-                    await BeginInvoke(invocationRequest, cancellationToken);
-                }
-                catch
-                {
-                }
-            });
-        }
-
-        private async Task BeginInvoke(WebApi.Models.InvocationRequest invocationRequest, CancellationToken cancellationToken)
+        public async Task<WebApi.Models.InvocationCompletion> PostInvocation(WebApi.Models.InvocationRequest invocationRequest, CancellationToken cancellationToken)
         {
             var @object = ConvertObject(invocationRequest.Object);
             var method = ConvertMethod(invocationRequest.Method);
@@ -65,7 +50,6 @@ namespace CodeMercury.WebApi.Controllers
             {
                 completion = new WebApi.Models.InvocationCompletion
                 {
-                    InvocationId = invocationRequest.InvocationId,
                     Status = WebApi.Models.InvocationStatus.Canceled
                 };
             }
@@ -73,7 +57,6 @@ namespace CodeMercury.WebApi.Controllers
             {
                 completion = new WebApi.Models.InvocationCompletion
                 {
-                    InvocationId = invocationRequest.InvocationId,
                     Status = WebApi.Models.InvocationStatus.Faulted,
                     Exception = new WebApi.Models.InvocationException
                     {
@@ -85,14 +68,11 @@ namespace CodeMercury.WebApi.Controllers
             {
                 completion = new WebApi.Models.InvocationCompletion
                 {
-                    InvocationId = invocationRequest.InvocationId,
                     Status = WebApi.Models.InvocationStatus.RanToCompletion,
                     Result = ConvertResult(method.ReturnType, resultArgument)
                 };
             }
-            var uri = new Uri(invocationRequest.RequesterUri, Url.Route("PostInvocationCompletion", null));
-            var response = await client.PostAsJsonAsync(uri, completion, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            return completion;
         }
 
         private Argument ConvertObject(WebApi.Models.Argument @object)

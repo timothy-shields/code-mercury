@@ -14,9 +14,6 @@ namespace CodeMercury.WebApi.Models
         [DataMember(Name = "requester_uri", IsRequired = true)]
         public Uri RequesterUri { get; set; }
 
-        [DataMember(Name = "invocation_id", IsRequired = true)]
-        public Guid InvocationId { get; set; }
-
         [DataMember(Name = "object", IsRequired = false)]
         public Argument Object { get; set; }
 

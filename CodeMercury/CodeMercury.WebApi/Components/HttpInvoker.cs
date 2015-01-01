@@ -1,6 +1,6 @@
-﻿using CodeMercury.Domain.Models;
+﻿using CodeMercury.Components;
+using CodeMercury.Domain.Models;
 using CodeMercury.Services;
-using CodeMercury.WebApi.Services;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
@@ -11,53 +11,11 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.WebApi.Components
 {
-    public class HttpInvoker : IInvoker, IInvocationObserver
+    public class HttpInvoker : IInvoker
     {
         private readonly Uri requesterUri;
         private readonly HttpClient client;
         private readonly IServiceContainer serviceContainer;
-        private readonly ConcurrentDictionary<Guid, InvocationContext> contexts = new ConcurrentDictionary<Guid, InvocationContext>();
-
-        private class InvocationContext : IDisposable
-        {
-            public Guid Key { get; private set; }
-            public Invocation Invocation { get; private set; }
-            private IDisposable disposable;
-            private TaskCompletionSource<Argument> taskCompletionSource;
-
-            public Task<Argument> Task
-            {
-                get { return taskCompletionSource.Task; }
-            }
-
-            public InvocationContext(Guid key, Invocation invocation, IDisposable disposable)
-            {
-                Key = key;
-                Invocation = invocation;
-                this.disposable = disposable;
-                taskCompletionSource = new TaskCompletionSource<Argument>();
-            }
-
-            public void TrySetResult(Argument result)
-            {
-                taskCompletionSource.TrySetResult(result);
-            }
-
-            public void TrySetCanceled()
-            {
-                taskCompletionSource.TrySetCanceled();
-            }
-
-            public void TrySetException(InvocationException exception)
-            {
-                taskCompletionSource.TrySetException(exception);
-            }
-
-            public void Dispose()
-            {
-                disposable.Dispose();
-            }
-        }
 
         public HttpInvoker(Uri requesterUri, Uri serverUri, IServiceContainer serviceContainer)
         {
@@ -68,12 +26,11 @@ namespace CodeMercury.WebApi.Components
 
         public async Task<Argument> InvokeAsync(Invocation invocation)
         {
-            using (var context = CreateContext(invocation))
+            using (var scopedServiceContainer = new ScopedServiceContainer(serviceContainer))
             {
                 var request = new WebApi.Models.InvocationRequest
                 {
                     RequesterUri = requesterUri,
-                    InvocationId = context.Key,
                     Object = ConvertObject(invocation.Object),
                     Method = ConvertMethod(invocation.Method),
                     Arguments = Enumerable.Zip(invocation.Method.Parameters, invocation.Arguments,
@@ -81,8 +38,39 @@ namespace CodeMercury.WebApi.Components
                 };
                 var response = await client.PostAsJsonAsync("invocations", request);
                 response.EnsureSuccessStatusCode();
-                return await context.Task;
+                var completion = await response.Content.ReadAsAsync<WebApi.Models.InvocationCompletion>();
+                if (completion.Status == WebApi.Models.InvocationStatus.RanToCompletion)
+                {
+                    return ConvertResult(completion.Result);
+                }
+                if (completion.Status == WebApi.Models.InvocationStatus.Canceled)
+                {
+                    throw new OperationCanceledException();
+                }
+                if (completion.Status == WebApi.Models.InvocationStatus.Faulted)
+                {
+                    throw new InvocationException(completion.Exception.Content);
+                }
+                throw new CodeMercuryBugException();
             }
+        }
+
+        private static Argument ConvertResult(WebApi.Models.Argument argument)
+        {
+            if (argument is WebApi.Models.TaskArgument)
+            {
+                return new TaskArgument(ConvertResult(argument.CastTo<WebApi.Models.TaskArgument>().Result));
+            }
+            if (argument is WebApi.Models.ValueArgument)
+            {
+                var valueArgument = argument.CastTo<WebApi.Models.ValueArgument>();
+                return new ValueArgument(valueArgument.Value.ToObject(valueArgument.Type));
+            }
+            if (argument is WebApi.Models.VoidArgument)
+            {
+                return new VoidArgument();
+            }
+            throw new CodeMercuryBugException();
         }
 
         private static WebApi.Models.Argument ConvertObject(Argument @object)
@@ -152,50 +140,6 @@ namespace CodeMercury.WebApi.Components
         private static bool IsProxyable(Type parameterType)
         {
             return parameterType.IsInterface;
-        }
-
-        private InvocationContext CreateContext(Invocation invocation)
-        {
-            var key = Guid.NewGuid();
-            var context = new InvocationContext(key, invocation, Disposable.Create(() =>
-            {
-                InvocationContext junk;
-                contexts.TryRemove(key, out junk);
-            }));
-            if (!contexts.TryAdd(key, context))
-            {
-                //TODO: need more elegant handling of this case
-                throw new CodeMercuryBugException();
-            }
-            return context;
-        }
-
-        private InvocationContext GetContext(Guid key)
-        {
-            InvocationContext context;
-            if (!contexts.TryGetValue(key, out context))
-            {
-                throw new CodeMercuryBugException();
-            }
-            return context;
-        }
-
-        public void OnResult(Guid key, Argument result)
-        {
-            var context = GetContext(key);
-            context.TrySetResult(result);
-        }
-
-        public void OnCancellation(Guid key)
-        {
-            var context = GetContext(key);
-            context.TrySetCanceled();
-        }
-
-        public void OnException(Guid key, InvocationException exception)
-        {
-            var context = GetContext(key);
-            context.TrySetException(exception);
         }
     }
 }

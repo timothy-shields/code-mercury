@@ -96,6 +96,7 @@
     <Compile Include="Components\CompositeInvoker.cs" />
     <Compile Include="Components\ProxyActivator.cs" />
     <Compile Include="Components\ProxyContainer.cs" />
+    <Compile Include="Components\ScopedServiceContainer.cs" />
     <Compile Include="Components\ScopedProxyContainer.cs" />
     <Compile Include="Domain\Models\TaskArgument.cs" />
     <Compile Include="Services\IInvoker.cs" />

@@ -31,12 +31,7 @@ namespace CodeMercury.WebApi
             container.Register(
 
                 // Register controllers
-
-                Component.For<CompletionController>()
-                    .DependsOn(
-                        Dependency.OnComponent<IInvocationObserver, HttpInvoker>())
-                    .LifestyleTransient(),
-
+                
                 Component.For<InvocationController>()
                     .DependsOn(
                         Dependency.OnComponent<IInvoker, LocalInvoker>())
