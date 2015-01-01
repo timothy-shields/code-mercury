@@ -97,7 +97,6 @@
     <Compile Include="Components\ProxyActivator.cs" />
     <Compile Include="Components\ProxyContainer.cs" />
     <Compile Include="Domain\Models\TaskArgument.cs" />
-    <Compile Include="Services\IInvocationObserver.cs" />
     <Compile Include="Services\IInvoker.cs" />
     <Compile Include="Services\InvokerExtensions.cs" />
     <Compile Include="Services\IProxy.cs" />

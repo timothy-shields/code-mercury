@@ -42,7 +42,7 @@ namespace CodeMercury.WebApi.Controllers
                 {
                     await BeginInvoke(invocationRequest, cancellationToken);
                 }
-                catch (Exception e)
+                catch
                 {
                 }
             });

@@ -17,6 +17,15 @@ namespace CodeMercury.WebApi
 {
     public class WindsorInstaller : IWindsorInstaller
     {
+        private readonly Uri requesterUri;
+        private readonly Uri serverUri;
+
+        public WindsorInstaller(Uri requesterUri, Uri serverUri)
+        {
+            this.requesterUri = requesterUri;
+            this.serverUri = serverUri;
+        }
+
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
             container.Register(
@@ -29,7 +38,8 @@ namespace CodeMercury.WebApi
                     .LifestyleTransient(),
 
                 Component.For<InvocationController>()
-                    .DependsOn(Dependency.OnComponent<IInvoker, LocalInvoker>())
+                    .DependsOn(
+                        Dependency.OnComponent<IInvoker, LocalInvoker>())
                     .LifestyleTransient(),
 
                 // Register components
@@ -38,8 +48,8 @@ namespace CodeMercury.WebApi
                     .LifestyleSingleton(),
                 Component.For<HttpInvoker>()
                     .DependsOn(
-                        Dependency.OnValue("requesterUri", new Uri("http://localhost:9090/")),
-                        Dependency.OnValue("serverUri", new Uri("http://localhost:9090/")))
+                        Dependency.OnValue("requesterUri", requesterUri),
+                        Dependency.OnValue("serverUri", serverUri))
                     .LifestyleSingleton(),
                 Component.For<IProxyActivator>()
                     .ImplementedBy<ProxyActivator>()
