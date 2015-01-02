@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Example
 {
-    public class ProxyGizmoCache : IGizmoCache, IProxy<IGizmoCache>
+    public class ProxyGizmoCache : IGizmoCache
     {
         private readonly IInvoker invoker;
 

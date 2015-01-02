@@ -8,9 +8,9 @@ namespace CodeMercury.Domain.Models
 {
     public class ExceptionArgument : Argument
     {
-        public Exception Exception { get; private set; }
+        public new Exception Exception { get; private set; }
 
-        public ExceptionArgument(Exception exception)
+        internal ExceptionArgument(Exception exception)
         {
             if (exception == null)
             {
@@ -18,6 +18,11 @@ namespace CodeMercury.Domain.Models
             }
 
             this.Exception = exception;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("Exception({0})", Exception.GetType().Name);
         }
     }
 }

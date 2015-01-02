@@ -113,6 +113,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CodeMercury.Domain.Models\CodeMercury.Domain.Models.csproj">
+      <Project>{881fc969-b563-4f33-a555-e1ac9cc32d0a}</Project>
+      <Name>CodeMercury.Domain.Models</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CodeMercury.WebApi.Models\CodeMercury.WebApi.Models.csproj">
       <Project>{39148646-7d76-4d5a-b8e4-4e582ac3acef}</Project>
       <Name>CodeMercury.WebApi.Models</Name>

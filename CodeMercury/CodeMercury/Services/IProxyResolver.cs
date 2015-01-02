@@ -17,6 +17,6 @@ namespace CodeMercury.Services
         /// <param name="serviceId">The service ID.</param>
         /// <param name="serviceType">The service type.</param>
         /// <returns>The proxy instance.</returns>
-        IProxy Resolve(Guid serviceId, Type serviceType);
+        object Resolve(Guid serviceId, Type serviceType);
     }
 }

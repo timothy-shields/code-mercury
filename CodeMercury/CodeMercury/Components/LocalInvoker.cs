@@ -33,8 +33,8 @@ namespace CodeMercury.Components
         {
             var @object = ResolveObject(invocation.Object);
             var method = ResolveMethod(invocation.Method, @object);
-            var arguments = Enumerable.Zip(method.Parameters, invocation.Arguments,
-                (parameter, argument) => ResolveArgument(parameter, argument)).ToArray();
+            var arguments = Enumerable.Zip(method.ParameterTypes, invocation.Arguments,
+                (parameterType, argument) => ResolveArgument(parameterType, argument)).ToArray();
             object result;
             try
             {
@@ -42,7 +42,7 @@ namespace CodeMercury.Components
             }
             catch (TargetInvocationException exception)
             {
-                return new ExceptionArgument(exception.InnerException);
+                return Argument.Exception(exception.InnerException);
             }
             return await CreateResultAsync(method.ReturnType, result);
         }
@@ -69,11 +69,11 @@ namespace CodeMercury.Components
             return method.WithDeclaringType(@object.GetType());
         }
 
-        private object ResolveArgument(Parameter parameter, Argument argument)
+        private object ResolveArgument(Type parameterType, Argument argument)
         {
             if (argument is ProxyArgument)
             {
-                return proxyResolver.Resolve(argument.CastTo<ProxyArgument>().ServiceId, parameter.ParameterType);
+                return proxyResolver.Resolve(argument.CastTo<ProxyArgument>().ServiceId, parameterType);
             }
             if (argument is ValueArgument)
             {
@@ -92,16 +92,12 @@ namespace CodeMercury.Components
                 {
                     value = await ((dynamic)result).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException)
-                {
-                    return new TaskArgument(new CanceledArgument());
-                }
                 catch (Exception exception)
                 {
-                    return new TaskArgument(new ExceptionArgument(exception));
+                    return Argument.Task(Argument.Exception(exception));
                 }
                 var taskResult = await CreateResultAsync(resultType, value).ConfigureAwait(false);
-                return new TaskArgument(taskResult);
+                return Argument.Task(taskResult);
             }
             if (type.Equals(typeof(Task)))
             {
@@ -109,21 +105,17 @@ namespace CodeMercury.Components
                 {
                     await result.CastTo<Task>().ConfigureAwait(false);
                 }
-                catch (OperationCanceledException)
-                {
-                    return new TaskArgument(new CanceledArgument());
-                }
                 catch (Exception exception)
                 {
-                    return new TaskArgument(new ExceptionArgument(exception));
+                    return Argument.Task(Argument.Exception(exception));
                 }
-                return new TaskArgument(new VoidArgument());
+                return Argument.Task(Argument.Void);
             }
             if (type.Equals(typeof(void)))
             {
-                return new VoidArgument();
+                return Argument.Void;
             }
-            return new ValueArgument(result);
+            return Argument.Value(result);
         }
     }
 }

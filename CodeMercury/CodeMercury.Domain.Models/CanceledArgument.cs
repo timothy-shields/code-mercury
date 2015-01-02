@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 
 namespace CodeMercury.Domain.Models
 {
-    /// <summary>
-    /// Represents the result of a void- or Task-returning method.
-    /// </summary>
-    public class VoidArgument : Argument
+    public class CanceledArgument : Argument
     {
+        internal CanceledArgument()
+        {
+        }
+
         public override string ToString()
         {
-            return "Void";
+            return "Canceled";
         }
     }
 }

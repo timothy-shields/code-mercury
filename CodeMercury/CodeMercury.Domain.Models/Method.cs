@@ -25,7 +25,7 @@ namespace CodeMercury.Domain.Models
         /// <summary>
         /// The parameters of the method.
         /// </summary>
-        public IReadOnlyCollection<Parameter> Parameters { get; private set; }
+        public IReadOnlyCollection<Type> ParameterTypes { get; private set; }
 
         private readonly Lazy<MethodInfo> lazyMethodInfo;
 
@@ -45,11 +45,11 @@ namespace CodeMercury.Domain.Models
             get { return MethodInfo.ReturnType; }
         }
 
-        public Method(Type declaringType, string name, IReadOnlyCollection<Parameter> parameters)
+        public Method(Type declaringType, string name, IReadOnlyCollection<Type> parameterTypes)
         {
             this.DeclaringType = declaringType;
             this.Name = name;
-            this.Parameters = parameters;
+            this.ParameterTypes = parameterTypes;
 
             this.lazyMethodInfo = new Lazy<MethodInfo>(GetMethodInfo);
         }
@@ -61,7 +61,7 @@ namespace CodeMercury.Domain.Models
         /// <returns>The other method.</returns>
         public Method WithDeclaringType(Type declaringType)
         {
-            return new Method(declaringType, Name, Parameters);
+            return new Method(declaringType, Name, ParameterTypes);
         }
 
         private MethodInfo GetMethodInfo()
@@ -71,13 +71,13 @@ namespace CodeMercury.Domain.Models
                 BindingFlags.Public |
                 BindingFlags.Static |
                 BindingFlags.Instance;
-            var methodInfo = DeclaringType.GetMethod(Name, bindingFlags, null, Parameters.Select(parameter => parameter.ParameterType).ToArray(), null);
+            var methodInfo = DeclaringType.GetMethod(Name, bindingFlags, null, ParameterTypes.ToArray(), null);
             return methodInfo;
         }
 
         public override string ToString()
         {
-            return string.Format("Method({0}.{1}({2}))", DeclaringType.Name, Name, string.Join(", ", Parameters));
+            return string.Format("Method({0}.{1}({2}))", DeclaringType.Name, Name, string.Join(", ", ParameterTypes));
         }
     }
 }

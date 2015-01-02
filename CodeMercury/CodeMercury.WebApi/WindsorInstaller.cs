@@ -49,7 +49,7 @@ namespace CodeMercury.WebApi
                 Component.For<IProxyActivator>()
                     .ImplementedBy<ProxyActivator>()
                     .DependsOn(
-                        Dependency.OnValue("activators", new Dictionary<Type, Func<IInvoker, IProxy>>
+                        Dependency.OnValue("activators", new Dictionary<Type, Func<IInvoker, object>>
                         {
                             { typeof(IGizmoCache), invoker => new ProxyGizmoCache(invoker) }
                         }))

@@ -59,6 +59,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CodeMercury.Domain.Models\CodeMercury.Domain.Models.csproj">
+      <Project>{881fc969-b563-4f33-a555-e1ac9cc32d0a}</Project>
+      <Name>CodeMercury.Domain.Models</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CodeMercury\CodeMercury.csproj">
       <Project>{3e0b87dc-f885-445e-b41b-fad6c6120519}</Project>
       <Name>CodeMercury</Name>

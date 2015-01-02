@@ -13,7 +13,7 @@ namespace CodeMercury.Domain.Models
     {
         public Argument Result { get; private set; }
 
-        public TaskArgument(Argument result)
+        internal TaskArgument(Argument result)
         {
             if (result == null)
             {

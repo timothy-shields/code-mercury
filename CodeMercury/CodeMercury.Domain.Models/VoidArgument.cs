@@ -7,20 +7,17 @@ using System.Threading.Tasks;
 namespace CodeMercury.Domain.Models
 {
     /// <summary>
-    /// Represents a value.
+    /// Represents the result of a void- or Task-returning method.
     /// </summary>
-    public class ValueArgument : Argument
+    public class VoidArgument : Argument
     {
-        public object Value { get; private set; }
-
-        public ValueArgument(object value)
+        internal VoidArgument()
         {
-            this.Value = value;
         }
 
         public override string ToString()
         {
-            return string.Format("Value({0})", Value);
+            return "Void";
         }
     }
 }

@@ -18,7 +18,7 @@ namespace CodeMercury.Domain.Models
         /// </summary>
         public Guid ServiceId { get; private set; }
 
-        public ProxyArgument(Guid serviceId)
+        internal ProxyArgument(Guid serviceId)
         {
             this.ServiceId = serviceId;
         }

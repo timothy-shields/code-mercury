@@ -12,11 +12,11 @@ namespace CodeMercury.Components
     /// </summary>
     public class ProxyActivator : IProxyActivator
     {
-        private readonly Dictionary<Type, Func<IInvoker, IProxy>> activators;
+        private readonly Dictionary<Type, Func<IInvoker, object>> activators;
 
-        public ProxyActivator(IDictionary<Type, Func<IInvoker, IProxy>> activators)
+        public ProxyActivator(IDictionary<Type, Func<IInvoker, object>> activators)
         {
-            this.activators = new Dictionary<Type, Func<IInvoker, IProxy>>(activators);
+            this.activators = new Dictionary<Type, Func<IInvoker, object>>(activators);
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace CodeMercury.Components
         /// <param name="serviceType">The type of the remote service.</param>
         /// <param name="proxyInvoker">The invoker to use in the proxy.</param>
         /// <returns>The proxy instance.</returns>
-        public IProxy Create(Type serviceType, IInvoker proxyInvoker)
+        public object Create(Type serviceType, IInvoker proxyInvoker)
         {
             if (!serviceType.IsInterface)
             {

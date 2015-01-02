@@ -56,7 +56,6 @@
     <Compile Include="InvocationStatus.cs" />
     <Compile Include="JsonCreationConverter.cs" />
     <Compile Include="Method.cs" />
-    <Compile Include="Parameter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProxyArgument.cs" />
     <Compile Include="ServiceArgument.cs" />

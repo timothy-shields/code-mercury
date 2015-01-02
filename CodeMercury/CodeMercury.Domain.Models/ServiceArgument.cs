@@ -18,7 +18,7 @@ namespace CodeMercury.Domain.Models
         /// </summary>
         public Guid ServiceId { get; private set; }
 
-        public ServiceArgument(Guid serviceId)
+        internal ServiceArgument(Guid serviceId)
         {
             this.ServiceId = serviceId;
         }

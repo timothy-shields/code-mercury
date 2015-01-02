@@ -27,7 +27,7 @@ namespace CodeMercury.Components
         {
             return await invoker.InvokeAsync(
                 new Invocation(
-                    new ServiceArgument(serviceId),
+                    Argument.Service(serviceId),
                     invocation.Method,
                     invocation.Arguments));
         }

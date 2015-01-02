@@ -97,12 +97,8 @@
     <Compile Include="Components\ProxyActivator.cs" />
     <Compile Include="Components\ProxyResolver.cs" />
     <Compile Include="Components\ScopedServiceContainer.cs" />
-    <Compile Include="Domain\Models\CanceledArgument.cs" />
-    <Compile Include="Domain\Models\ExceptionArgument.cs" />
-    <Compile Include="Domain\Models\TaskArgument.cs" />
     <Compile Include="Services\IInvoker.cs" />
     <Compile Include="Services\InvokerExtensions.cs" />
-    <Compile Include="Services\IProxy.cs" />
     <Compile Include="Services\IServiceResolver.cs" />
     <Compile Include="Services\IProxyActivator.cs" />
     <Compile Include="Services\IProxyResolver.cs" />
@@ -110,16 +106,6 @@
     <Compile Include="Components\LocalInvoker.cs" />
     <Compile Include="Components\ProxyInvoker.cs" />
     <Compile Include="Components\ServiceContainer.cs" />
-    <Compile Include="Domain\Models\Argument.cs" />
-    <Compile Include="Domain\Models\Method.cs" />
-    <Compile Include="Domain\Models\Invocation.cs" />
-    <Compile Include="Domain\Models\InvocationException.cs" />
-    <Compile Include="Domain\Models\Parameter.cs" />
-    <Compile Include="Domain\Models\ProxyArgument.cs" />
-    <Compile Include="Domain\Models\ServiceArgument.cs" />
-    <Compile Include="Domain\Models\StaticArgument.cs" />
-    <Compile Include="Domain\Models\ValueArgument.cs" />
-    <Compile Include="Domain\Models\VoidArgument.cs" />
     <Compile Include="EnumHelper.cs" />
     <Compile Include="Expressions\BindParameterExpressionVisitor.cs" />
     <Compile Include="Expressions\ExpressionHelper.cs" />
@@ -131,6 +117,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CodeMercury.Domain.Models\CodeMercury.Domain.Models.csproj">
+      <Project>{881fc969-b563-4f33-a555-e1ac9cc32d0a}</Project>
+      <Name>CodeMercury.Domain.Models</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CodeMercury.WebApi.Models\CodeMercury.WebApi.Models.csproj">
       <Project>{39148646-7d76-4d5a-b8e4-4e582ac3acef}</Project>
       <Name>CodeMercury.WebApi.Models</Name>

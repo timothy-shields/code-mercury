@@ -46,11 +46,11 @@ namespace CodeMercury.WebApi.Controllers
         {
             if (@object is WebApi.Models.ServiceArgument)
             {
-                return new ServiceArgument(@object.CastTo<WebApi.Models.ServiceArgument>().ServiceId);
+                return Argument.Service(@object.CastTo<WebApi.Models.ServiceArgument>().ServiceId);
             }
             if (@object is WebApi.Models.StaticArgument)
             {
-                return new StaticArgument();
+                return Argument.Static;
             }
             throw new CodeMercuryBugException();
         }
@@ -60,23 +60,23 @@ namespace CodeMercury.WebApi.Controllers
             return new Method(
                 method.DeclaringType,
                 method.Name,
-                method.Parameters.Select(parameter => new Parameter(parameter.ParameterType)).ToList().AsReadOnly());
+                method.ParameterTypes.ToList().AsReadOnly());
         }
 
         private IReadOnlyCollection<Argument> ConvertArguments(WebApi.Models.InvocationRequest invocationRequest)
         {
-            return Enumerable.Zip<WebApi.Models.Parameter, WebApi.Models.Argument, Argument>(
-                invocationRequest.Method.Parameters,
+            return Enumerable.Zip<Type, WebApi.Models.Argument, Argument>(
+                invocationRequest.Method.ParameterTypes,
                 invocationRequest.Arguments,
-                (parameter, argument) =>
+                (parameterType, argument) =>
                 {
                     if (argument is WebApi.Models.ProxyArgument)
                     {
-                        return new ProxyArgument(argument.CastTo<WebApi.Models.ProxyArgument>().ServiceId);
+                        return Argument.Proxy(argument.CastTo<WebApi.Models.ProxyArgument>().ServiceId);
                     }
                     if (argument is WebApi.Models.ValueArgument)
                     {
-                        return new ValueArgument(argument.CastTo<WebApi.Models.ValueArgument>().Value.ToObject(parameter.ParameterType));
+                        return Argument.Value(argument.CastTo<WebApi.Models.ValueArgument>().Value.ToObject(parameterType));
                     }
                     throw new CodeMercuryBugException();
                 })

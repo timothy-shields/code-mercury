@@ -33,8 +33,8 @@ namespace CodeMercury.WebApi.Components
                     RequesterUri = requesterUri,
                     Object = ConvertObject(invocation.Object),
                     Method = ConvertMethod(invocation.Method),
-                    Arguments = Enumerable.Zip(invocation.Method.Parameters, invocation.Arguments,
-                        (parameter, argument) => ConvertArgument(parameter, argument)).ToList()
+                    Arguments = Enumerable.Zip(invocation.Method.ParameterTypes, invocation.Arguments,
+                        (parameterType, argument) => ConvertArgument(parameterType, argument)).ToList()
                 };
                 var response = await client.PostAsJsonAsync("invocations", request);
                 response.EnsureSuccessStatusCode();
@@ -48,24 +48,24 @@ namespace CodeMercury.WebApi.Components
         {
             if (argument is WebApi.Models.CanceledArgument)
             {
-                return new CanceledArgument();
+                return Argument.Canceled;
             }
             if (argument is WebApi.Models.ExceptionArgument)
             {
-                return new ExceptionArgument(new InvocationException(argument.CastTo<WebApi.Models.ExceptionArgument>().Content));
+                return Argument.Exception(new InvocationException(argument.CastTo<WebApi.Models.ExceptionArgument>().Content));
             }
             if (argument is WebApi.Models.TaskArgument)
             {
-                return new TaskArgument(ConvertResult(argument.CastTo<WebApi.Models.TaskArgument>().Result));
+                return Argument.Task(ConvertResult(argument.CastTo<WebApi.Models.TaskArgument>().Result));
             }
             if (argument is WebApi.Models.ValueArgument)
             {
                 var valueArgument = argument.CastTo<WebApi.Models.ValueArgument>();
-                return new ValueArgument(valueArgument.Value.ToObject(valueArgument.Type));
+                return Argument.Value(valueArgument.Value.ToObject(valueArgument.Type));
             }
             if (argument is WebApi.Models.VoidArgument)
             {
-                return new VoidArgument();
+                return Argument.Void;
             }
             throw new CodeMercuryBugException();
         }
@@ -99,21 +99,16 @@ namespace CodeMercury.WebApi.Components
             {
                 DeclaringType = method.DeclaringType,
                 Name = method.Name,
-                Parameters = method.Parameters
-                    .Select(parameter => new WebApi.Models.Parameter
-                    {
-                        ParameterType = parameter.ParameterType
-                    })
-                    .ToList()
+                ParameterTypes = method.ParameterTypes.ToList()
             };
         }
 
-        private WebApi.Models.Argument ConvertArgument(Parameter parameter, Argument argument)
+        private WebApi.Models.Argument ConvertArgument(Type parameterType, Argument argument)
         {
             if (argument is ValueArgument)
             {
                 var value = argument.CastTo<ValueArgument>().Value;
-                if (IsProxyable(parameter.ParameterType))
+                if (IsProxyable(parameterType))
                 {
                     var serviceId = Guid.NewGuid();
                     serviceContainer.Register(serviceId, value);

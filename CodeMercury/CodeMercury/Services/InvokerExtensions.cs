@@ -51,9 +51,9 @@ namespace CodeMercury.Services
         {
             if (expression.Object == null)
             {
-                return new StaticArgument();
+                return Argument.Static;
             }
-            return new ValueArgument(expression.Object);
+            return Argument.Value(expression.Object);
         }
 
         private static Method GetMethod(MethodCallExpression expression)
@@ -62,15 +62,16 @@ namespace CodeMercury.Services
                 expression.Method.DeclaringType,
                 expression.Method.Name,
                 expression.Method.GetParameters()
-                    .Select(parameter => new Parameter(parameter.ParameterType))
+                    .Select(parameterInfo => parameterInfo.ParameterType)
                     .ToList()
                     .AsReadOnly());
         }
 
-        private static IReadOnlyCollection<ValueArgument> GetArguments(MethodCallExpression expression)
+        private static IReadOnlyCollection<Argument> GetArguments(MethodCallExpression expression)
         {
             return expression.Arguments
-                .Select(argument => new ValueArgument(ExpressionHelper.Evaluate(argument)))
+                .Select(ExpressionHelper.Evaluate)
+                .Select(Argument.Value)
                 .ToList()
                 .AsReadOnly();
         }

@@ -17,6 +17,6 @@ namespace CodeMercury.Services
         /// <param name="serviceType">The type of the remote service.</param>
         /// <param name="proxyInvoker">The invoker to use in the proxy.</param>
         /// <returns>The proxy instance.</returns>
-        IProxy Create(Type serviceType, IInvoker proxyInvoker);
+        object Create(Type serviceType, IInvoker proxyInvoker);
     }
 }

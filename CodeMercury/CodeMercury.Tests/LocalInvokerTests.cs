@@ -33,9 +33,9 @@ namespace CodeMercury.Tests
         public async Task StaticMethodInvocationRunsToCompletion()
         {
             var invocation = new Invocation(
-                new StaticArgument(),
-                new Method(typeof(Math), "Max", new List<Parameter> { new Parameter(typeof(int)), new Parameter(typeof(int)) }),
-                new List<Argument> { new ValueArgument(5), new ValueArgument(7) });
+                Argument.Static,
+                new Method(typeof(Math), "Max", new List<Type> { typeof(int), typeof(int) }),
+                new List<Argument> { Argument.Value(5), Argument.Value(7) });
 
             var argument = await LocalInvoker.InvokeAsync(invocation);
 
@@ -49,9 +49,9 @@ namespace CodeMercury.Tests
             serviceResolver.Setup(x => x.Resolve(serviceId)).Returns(new List<int> { 3, 5, 7, 6 }).Verifiable();
 
             var invocation = new Invocation(
-                new ServiceArgument(serviceId),
-                new Method(typeof(List<int>), "IndexOf", new List<Parameter> { new Parameter(typeof(int)) }),
-                new List<Argument> { new ValueArgument(7) });
+                Argument.Service(serviceId),
+                new Method(typeof(List<int>), "IndexOf", new List<Type> { typeof(int) }),
+                new List<Argument> { Argument.Value(7) });
 
             var argument = await LocalInvoker.InvokeAsync(invocation);
 

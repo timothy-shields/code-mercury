@@ -12,6 +12,7 @@ namespace CodeMercury.Components
     /// </summary>
     public class ServiceContainer : IServiceContainer, IServiceResolver
     {
+        private object sync = new object();
         private Dictionary<Guid, object> services = new Dictionary<Guid, object>();
 
         /// <summary>
@@ -21,7 +22,7 @@ namespace CodeMercury.Components
         /// <param name="serviceInstance">The service instance.</param>
         public void Register(Guid serviceId, object serviceInstance)
         {
-            lock (services)
+            lock (sync)
             {
                 services.Add(serviceId, serviceInstance);
             }
@@ -34,7 +35,7 @@ namespace CodeMercury.Components
         /// <returns>The service instance.</returns>
         public object Resolve(Guid serviceId)
         {
-            lock (services)
+            lock (sync)
             {
                 var service = services[serviceId];
                 return service;
@@ -43,7 +44,7 @@ namespace CodeMercury.Components
 
         public void Release(Guid serviceId)
         {
-            lock (services)
+            lock (sync)
             {
                 services.Remove(serviceId);
             }

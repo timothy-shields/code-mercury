@@ -21,7 +21,7 @@ namespace CodeMercury.Components
             this.invoker = invoker;
         }
 
-        public IProxy Resolve(Guid serviceId, Type serviceType)
+        public object Resolve(Guid serviceId, Type serviceType)
         {
             var proxyInvoker = new ProxyInvoker(invoker, serviceId);
             var proxy = proxyActivator.Create(serviceType, proxyInvoker);
