@@ -15,6 +15,9 @@ namespace CodeMercury.WebApi.Models
             get { return ArgumentKind.Exception; }
         }
 
+        [DataMember(Name = "type")]
+        public Type Type { get; set; }
+
         [DataMember(Name = "content")]
         public string Content { get; set; }        
     }

@@ -93,6 +93,7 @@ namespace CodeMercury.WebApi.Controllers
             {
                 return new WebApi.Models.ExceptionArgument
                 {
+                    Type = result.CastTo<ExceptionArgument>().Exception.GetType(),
                     Content = result.CastTo<ExceptionArgument>().Exception.ToString()
                 };
             }

@@ -93,10 +93,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeMercuryBugException.cs" />
+    <Compile Include="Components\ArgumentMaterializer.cs" />
     <Compile Include="Components\CompositeInvoker.cs" />
     <Compile Include="Components\ProxyActivator.cs" />
     <Compile Include="Components\ProxyResolver.cs" />
     <Compile Include="Components\ScopedServiceContainer.cs" />
+    <Compile Include="Services\IArgumentMaterializer.cs" />
     <Compile Include="Services\IInvoker.cs" />
     <Compile Include="Services\InvocationBuilder.cs" />
     <Compile Include="Services\InvokerExtensions.cs" />

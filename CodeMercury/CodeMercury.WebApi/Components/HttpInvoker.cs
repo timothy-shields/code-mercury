@@ -52,7 +52,8 @@ namespace CodeMercury.WebApi.Components
             }
             if (argument is WebApi.Models.ExceptionArgument)
             {
-                return Argument.Exception(new InvocationException(argument.CastTo<WebApi.Models.ExceptionArgument>().Content));
+                var exceptionArgument = (WebApi.Models.ExceptionArgument)argument;
+                return Argument.Exception(CapturedException.Create(exceptionArgument.Type, exceptionArgument.Content));
             }
             if (argument is WebApi.Models.TaskArgument)
             {

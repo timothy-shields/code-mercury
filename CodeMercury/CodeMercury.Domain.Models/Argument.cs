@@ -12,6 +12,10 @@ namespace CodeMercury.Domain.Models
     /// </summary>
     public abstract class Argument
     {
+        protected internal Argument()
+        {
+        }
+
         private static readonly CanceledArgument canceled = new CanceledArgument();
         public static Argument Canceled
         {
