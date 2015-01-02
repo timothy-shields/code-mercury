@@ -33,7 +33,7 @@ namespace CodeMercury.Components
         {
             var @object = ResolveObject(invocation.Object);
             var method = ResolveMethod(invocation.Method, @object);
-            var arguments = Enumerable.Zip(method.ParameterTypes, invocation.Arguments,
+            var arguments = method.ParameterTypes.Zip(invocation.Arguments,
                 (parameterType, argument) => ResolveArgument(parameterType, argument)).ToArray();
             object result;
             try

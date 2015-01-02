@@ -33,7 +33,7 @@ namespace CodeMercury.WebApi.Components
                     RequesterUri = requesterUri,
                     Object = ConvertObject(invocation.Object),
                     Method = ConvertMethod(invocation.Method),
-                    Arguments = Enumerable.Zip(invocation.Method.ParameterTypes, invocation.Arguments,
+                    Arguments = invocation.Method.ParameterTypes.Zip(invocation.Arguments,
                         (parameterType, argument) => ConvertArgument(parameterType, argument)).ToList()
                 };
                 var response = await client.PostAsJsonAsync("invocations", request);
@@ -53,7 +53,7 @@ namespace CodeMercury.WebApi.Components
             if (argument is WebApi.Models.ExceptionArgument)
             {
                 var exceptionArgument = (WebApi.Models.ExceptionArgument)argument;
-                return Argument.Exception(CapturedException.Create(exceptionArgument.Type, exceptionArgument.Content));
+                return Argument.Exception(CapturedException.Create(exceptionArgument.Type, exceptionArgument.Contents));
             }
             if (argument is WebApi.Models.TaskArgument)
             {

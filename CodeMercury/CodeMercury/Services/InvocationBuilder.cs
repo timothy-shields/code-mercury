@@ -82,17 +82,15 @@ namespace CodeMercury.Services
                 expression.Method.Name,
                 expression.Method.GetParameters()
                     .Select(parameterInfo => parameterInfo.ParameterType)
-                    .ToList()
-                    .AsReadOnly());
+                    .ToList());
         }
 
-        private static IReadOnlyCollection<Argument> GetArguments(MethodCallExpression expression)
+        private static List<Argument> GetArguments(MethodCallExpression expression)
         {
             return expression.Arguments
                 .Select(ExpressionHelper.Evaluate)
                 .Select(Argument.Value)
-                .ToList()
-                .AsReadOnly();
+                .ToList();
         }
     }
 }

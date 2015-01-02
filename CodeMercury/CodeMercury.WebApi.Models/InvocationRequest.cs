@@ -21,6 +21,6 @@ namespace CodeMercury.WebApi.Models
         public Method Method { get; set; }
 
         [DataMember(Name = "arguments", IsRequired = true)]
-        public IEnumerable<Argument> Arguments { get; set; }
+        public List<Argument> Arguments { get; set; }
     }
 }

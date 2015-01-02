@@ -18,7 +18,7 @@ namespace CodeMercury.WebApi.Models
         [DataMember(Name = "type")]
         public Type Type { get; set; }
 
-        [DataMember(Name = "content")]
-        public string Content { get; set; }        
+        [DataMember(Name = "contents")]
+        public List<string> Contents { get; set; }        
     }
 }

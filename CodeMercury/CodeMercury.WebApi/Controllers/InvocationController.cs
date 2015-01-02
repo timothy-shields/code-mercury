@@ -57,17 +57,12 @@ namespace CodeMercury.WebApi.Controllers
 
         private static Method ConvertMethod(WebApi.Models.Method method)
         {
-            return new Method(
-                method.DeclaringType,
-                method.Name,
-                method.ParameterTypes.ToList().AsReadOnly());
+            return new Method(method.DeclaringType, method.Name, method.ParameterTypes);
         }
 
-        private IReadOnlyCollection<Argument> ConvertArguments(WebApi.Models.InvocationRequest invocationRequest)
+        private List<Argument> ConvertArguments(WebApi.Models.InvocationRequest invocationRequest)
         {
-            return Enumerable.Zip<Type, WebApi.Models.Argument, Argument>(
-                invocationRequest.Method.ParameterTypes,
-                invocationRequest.Arguments,
+            return invocationRequest.Method.ParameterTypes.Zip(invocationRequest.Arguments,
                 (parameterType, argument) =>
                 {
                     if (argument is WebApi.Models.ProxyArgument)
@@ -80,7 +75,7 @@ namespace CodeMercury.WebApi.Controllers
                     }
                     throw new CodeMercuryBugException();
                 })
-                .ToList().AsReadOnly();
+                .ToList();
         }
 
         private WebApi.Models.Argument ConvertResult(Type type, Argument result)
@@ -94,7 +89,10 @@ namespace CodeMercury.WebApi.Controllers
                 return new WebApi.Models.ExceptionArgument
                 {
                     Type = result.CastTo<ExceptionArgument>().Exception.GetType(),
-                    Content = result.CastTo<ExceptionArgument>().Exception.ToString()
+                    Contents = new List<string>
+                    {
+                        result.CastTo<ExceptionArgument>().Exception.ToString()
+                    }
                 };
             }
             if (result is TaskArgument)
