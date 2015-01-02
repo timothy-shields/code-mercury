@@ -57,6 +57,14 @@ namespace CodeMercury.WebApi.Components
 
         private static Argument ConvertResult(WebApi.Models.Argument argument)
         {
+            if (argument is WebApi.Models.CanceledArgument)
+            {
+                return new CanceledArgument();
+            }
+            if (argument is WebApi.Models.ExceptionArgument)
+            {
+                return new ExceptionArgument(new InvocationException(argument.CastTo<WebApi.Models.ExceptionArgument>().Content));
+            }
             if (argument is WebApi.Models.TaskArgument)
             {
                 return new TaskArgument(ConvertResult(argument.CastTo<WebApi.Models.TaskArgument>().Result));

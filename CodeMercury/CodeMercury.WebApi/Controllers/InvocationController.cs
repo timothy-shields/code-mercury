@@ -90,7 +90,7 @@ namespace CodeMercury.WebApi.Controllers
                 method.Parameters.Select(parameter => new Parameter(parameter.ParameterType, parameter.Name)).ToList().AsReadOnly());
         }
 
-        private IEnumerable<Argument> ConvertArguments(WebApi.Models.InvocationRequest invocationRequest)
+        private IReadOnlyCollection<Argument> ConvertArguments(WebApi.Models.InvocationRequest invocationRequest)
         {
             return Enumerable.Zip<WebApi.Models.Parameter, WebApi.Models.Argument, Argument>(
                 invocationRequest.Method.Parameters,
@@ -106,11 +106,23 @@ namespace CodeMercury.WebApi.Controllers
                         return new ValueArgument(argument.CastTo<WebApi.Models.ValueArgument>().Value.ToObject(parameter.ParameterType));
                     }
                     throw new CodeMercuryBugException();
-                });
+                })
+                .ToList().AsReadOnly();
         }
 
         private WebApi.Models.Argument ConvertResult(Type type, Argument result)
         {
+            if (result is CanceledArgument)
+            {
+                return new WebApi.Models.CanceledArgument();
+            }
+            if (result is ExceptionArgument)
+            {
+                return new WebApi.Models.ExceptionArgument
+                {
+                    Content = result.CastTo<ExceptionArgument>().Exception.ToString()
+                };
+            }
             if (result is TaskArgument)
             {
                 Type resultType;

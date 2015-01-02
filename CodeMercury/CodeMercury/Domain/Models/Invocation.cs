@@ -28,7 +28,7 @@ namespace CodeMercury.Domain.Models
         /// </summary>
         public IReadOnlyCollection<Argument> Arguments { get; private set; }
 
-        public Invocation(Argument @object, Method method, IEnumerable<Argument> arguments)
+        public Invocation(Argument @object, Method method, IReadOnlyCollection<Argument> arguments)
         {
             if (@object == null)
             {
@@ -45,7 +45,7 @@ namespace CodeMercury.Domain.Models
 
             this.Object = @object;
             this.Method = method;
-            this.Arguments = arguments.ToList().AsReadOnly();
+            this.Arguments = arguments;
         }
 
         public override string ToString()

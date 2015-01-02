@@ -9,6 +9,12 @@ namespace CodeMercury.WebApi.Models
     [DataContract(Name = "argument_kind")]
     public enum ArgumentKind
     {
+        [EnumMember(Value = "canceled")]
+        Canceled,
+
+        [EnumMember(Value = "exception")]
+        Exception,
+
         [EnumMember(Value = "proxy")]
         Proxy,
 

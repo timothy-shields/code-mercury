@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{BDF604
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeMercury.WebApi.Models", "CodeMercury.WebApi.Models\CodeMercury.WebApi.Models.csproj", "{39148646-7D76-4D5A-B8E4-4E582AC3ACEF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeMercury.Tests", "CodeMercury.Tests\CodeMercury.Tests.csproj", "{37CD1B13-6982-45E5-A771-058E944D38E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{39148646-7D76-4D5A-B8E4-4E582AC3ACEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39148646-7D76-4D5A-B8E4-4E582AC3ACEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39148646-7D76-4D5A-B8E4-4E582AC3ACEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37CD1B13-6982-45E5-A771-058E944D38E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37CD1B13-6982-45E5-A771-058E944D38E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37CD1B13-6982-45E5-A771-058E944D38E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37CD1B13-6982-45E5-A771-058E944D38E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

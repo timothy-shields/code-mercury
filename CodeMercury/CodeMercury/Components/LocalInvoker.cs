@@ -35,7 +35,15 @@ namespace CodeMercury.Components
             var method = ResolveMethod(invocation.Method, @object);
             var arguments = Enumerable.Zip(method.Parameters, invocation.Arguments,
                 (parameter, argument) => ResolveArgument(parameter, argument)).ToArray();
-            var result = Invoke(@object, method.MethodInfo, arguments);
+            object result;
+            try
+            {
+                result = method.MethodInfo.Invoke(@object, arguments);
+            }
+            catch (TargetInvocationException exception)
+            {
+                return new ExceptionArgument(exception.InnerException);
+            }
             return await CreateResultAsync(method.ReturnType, result);
         }
 
@@ -74,18 +82,6 @@ namespace CodeMercury.Components
             throw new CodeMercuryBugException();
         }
 
-        private static object Invoke(object @object, MethodInfo method, object[] arguments)
-        {
-            try
-            {
-                return method.Invoke(@object, arguments);
-            }
-            catch (TargetInvocationException exception)
-            {
-                throw new InvocationException(exception.InnerException);
-            }
-        }
-
         private static async Task<Argument> CreateResultAsync(Type type, object result)
         {
             if (type.IsSubclassOf(typeof(Task)))
@@ -96,9 +92,13 @@ namespace CodeMercury.Components
                 {
                     value = await ((dynamic)result).ConfigureAwait(false);
                 }
-                catch (TargetInvocationException exception)
+                catch (OperationCanceledException)
                 {
-                    throw new InvocationException(exception.InnerException);
+                    return new TaskArgument(new CanceledArgument());
+                }
+                catch (Exception exception)
+                {
+                    return new TaskArgument(new ExceptionArgument(exception));
                 }
                 var taskResult = await CreateResultAsync(resultType, value).ConfigureAwait(false);
                 return new TaskArgument(taskResult);
@@ -109,9 +109,13 @@ namespace CodeMercury.Components
                 {
                     await result.CastTo<Task>().ConfigureAwait(false);
                 }
-                catch (TargetInvocationException exception)
+                catch (OperationCanceledException)
                 {
-                    throw new InvocationException(exception.InnerException);
+                    return new TaskArgument(new CanceledArgument());
+                }
+                catch (Exception exception)
+                {
+                    return new TaskArgument(new ExceptionArgument(exception));
                 }
                 return new TaskArgument(new VoidArgument());
             }

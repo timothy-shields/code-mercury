@@ -20,7 +20,7 @@ namespace CodeMercury.Expressions
         public static Expression<Func<TResult>> BindInput<T, TResult>(Expression<Func<T, TResult>> expression, T input)
         {
             var parameterExpression = expression.Parameters.Single();
-            var methodCallExpression = expression.Body.As<MethodCallExpression>();
+            var methodCallExpression = expression.Body.CastTo<MethodCallExpression>();
             var visitor = new BindParameterExpressionVisitor
             {
                 ParameterExpression = parameterExpression,

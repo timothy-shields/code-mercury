@@ -97,6 +97,8 @@
     <Compile Include="Components\ProxyActivator.cs" />
     <Compile Include="Components\ProxyResolver.cs" />
     <Compile Include="Components\ScopedServiceContainer.cs" />
+    <Compile Include="Domain\Models\CanceledArgument.cs" />
+    <Compile Include="Domain\Models\ExceptionArgument.cs" />
     <Compile Include="Domain\Models\TaskArgument.cs" />
     <Compile Include="Services\IInvoker.cs" />
     <Compile Include="Services\InvokerExtensions.cs" />
@@ -123,7 +125,7 @@
     <Compile Include="Expressions\ExpressionHelper.cs" />
     <Compile Include="Functional.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RandomHelper.cs" />
+    <Compile Include="RandomExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

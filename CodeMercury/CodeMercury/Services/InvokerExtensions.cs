@@ -64,10 +64,12 @@ namespace CodeMercury.Services
                 expression.Method.GetParameters().Select(parameter => new Parameter(parameter)).ToList().AsReadOnly());
         }
 
-        private static IEnumerable<ValueArgument> GetArguments(MethodCallExpression expression)
+        private static IReadOnlyCollection<ValueArgument> GetArguments(MethodCallExpression expression)
         {
             return expression.Arguments
-                .Select(argument => new ValueArgument(ExpressionHelper.Evaluate(argument)));
+                .Select(argument => new ValueArgument(ExpressionHelper.Evaluate(argument)))
+                .ToList()
+                .AsReadOnly();
         }
     }
 }

@@ -48,6 +48,8 @@
     <Compile Include="Argument.cs" />
     <Compile Include="ArgumentJsonConverter.cs" />
     <Compile Include="ArgumentKind.cs" />
+    <Compile Include="CanceledArgument.cs" />
+    <Compile Include="ExceptionArgument.cs" />
     <Compile Include="InvocationCompletion.cs" />
     <Compile Include="InvocationException.cs" />
     <Compile Include="InvocationRequest.cs" />
