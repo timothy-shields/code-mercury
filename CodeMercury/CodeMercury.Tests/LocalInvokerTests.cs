@@ -32,13 +32,8 @@ namespace CodeMercury.Tests
         [TestMethod]
         public async Task StaticMethodInvocationRunsToCompletion()
         {
-            var invocation = new Invocation(
-                Argument.Static,
-                new Method(typeof(Math), "Max", new List<Type> { typeof(int), typeof(int) }),
-                new List<Argument> { Argument.Value(5), Argument.Value(7) });
-
+            var invocation = InvocationBuilder.Build(() => Math.Max(5, 7));
             var argument = await LocalInvoker.InvokeAsync(invocation);
-
             Assert.AreEqual(7, argument.CastTo<ValueArgument>().Value.CastTo<int>());
         }
 
@@ -47,16 +42,9 @@ namespace CodeMercury.Tests
         {
             var serviceId = Guid.NewGuid();
             serviceResolver.Setup(x => x.Resolve(serviceId)).Returns(new List<int> { 3, 5, 7, 6 }).Verifiable();
-
-            var invocation = new Invocation(
-                Argument.Service(serviceId),
-                new Method(typeof(List<int>), "IndexOf", new List<Type> { typeof(int) }),
-                new List<Argument> { Argument.Value(7) });
-
+            var invocation = InvocationBuilder.Build(Argument.Service(serviceId), (List<int> list) => list.IndexOf(7));
             var argument = await LocalInvoker.InvokeAsync(invocation);
-
             serviceResolver.Verify(x => x.Resolve(serviceId), Times.Once());
-
             Assert.AreEqual(2, argument.CastTo<ValueArgument>().Value.CastTo<int>());
         }
     }

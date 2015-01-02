@@ -98,6 +98,7 @@
     <Compile Include="Components\ProxyResolver.cs" />
     <Compile Include="Components\ScopedServiceContainer.cs" />
     <Compile Include="Services\IInvoker.cs" />
+    <Compile Include="Services\InvocationBuilder.cs" />
     <Compile Include="Services\InvokerExtensions.cs" />
     <Compile Include="Services\IServiceResolver.cs" />
     <Compile Include="Services\IProxyActivator.cs" />

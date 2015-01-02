@@ -55,10 +55,10 @@ namespace CodeMercury.Domain.Models
         }
 
         /// <summary>
-        /// Get another method that differs from this one in only its declaring type.
+        /// Gets another <see cref="Method"/> that differs from this one in only its declaring type.
         /// </summary>
-        /// <param name="declaringType">The type declaring the other method.</param>
-        /// <returns>The other method.</returns>
+        /// <param name="declaringType">The declaring type of the new method.</param>
+        /// <returns>The new method.</returns>
         public Method WithDeclaringType(Type declaringType)
         {
             return new Method(declaringType, Name, ParameterTypes);
@@ -77,7 +77,7 @@ namespace CodeMercury.Domain.Models
 
         public override string ToString()
         {
-            return string.Format("Method({0}.{1}({2}))", DeclaringType.Name, Name, string.Join(", ", ParameterTypes));
+            return string.Format("Method({0}.{1}({2}))", DeclaringType.Name, Name, string.Join(", ", ParameterTypes.Select(parameterType => parameterType.Name)));
         }
     }
 }

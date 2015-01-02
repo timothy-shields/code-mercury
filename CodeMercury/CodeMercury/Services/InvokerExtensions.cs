@@ -13,67 +13,39 @@ namespace CodeMercury.Services
     {
         public static async Task<TResult> InvokeAsync<TResult>(this IInvoker invoker, Expression<Func<Task<TResult>>> expression)
         {
-            var resultArgument = await invoker.InvokeAsync((MethodCallExpression)expression.Body).ConfigureAwait(false);
+            var invocation = InvocationBuilder.Build(expression);
+            var resultArgument = await invoker.InvokeAsync(invocation).ConfigureAwait(false);
             var result = resultArgument.CastTo<TaskArgument>().Result.CastTo<ValueArgument>().Value.CastTo<TResult>();
             return result;
         }
 
         public static async Task InvokeAsync(this IInvoker invoker, Expression<Func<Task>> expression)
         {
-            var resultArgument = await invoker.InvokeAsync((MethodCallExpression)expression.Body).ConfigureAwait(false);
+            var invocation = InvocationBuilder.Build(expression);
+            var resultArgument = await invoker.InvokeAsync(invocation).ConfigureAwait(false);
             var result = resultArgument.CastTo<TaskArgument>().Result.CastTo<VoidArgument>();
         }
 
         public static async Task<TResult> InvokeAsync<TResult>(this IInvoker invoker, Expression<Func<TResult>> expression)
         {
-            var resultArgument = await invoker.InvokeAsync((MethodCallExpression)expression.Body).ConfigureAwait(false);
+            var invocation = InvocationBuilder.Build(expression);
+            var resultArgument = await invoker.InvokeAsync(invocation).ConfigureAwait(false);
             var result = resultArgument.CastTo<ValueArgument>().Value.CastTo<TResult>();
             return result;
         }
 
         public static async Task InvokeAsync(this IInvoker invoker, Expression<Action> expression)
         {
-            var resultArgument = await invoker.InvokeAsync((MethodCallExpression)expression.Body).ConfigureAwait(false);
+            var invocation = InvocationBuilder.Build(expression);
+            var resultArgument = await invoker.InvokeAsync(invocation).ConfigureAwait(false);
             var result = resultArgument.CastTo<VoidArgument>();
         }
 
         public static async Task<Argument> InvokeAsync(this IInvoker invoker, MethodCallExpression expression)
         {
-            var @object = GetObjectArgument(expression);
-            var method = GetMethod(expression);
-            var arguments = GetArguments(expression);
-            var invocation = new Invocation(@object, method, arguments);
+            var invocation = InvocationBuilder.Build(expression);
             var result = await invoker.InvokeAsync(invocation).ConfigureAwait(false);
             return result;
-        }
-
-        private static Argument GetObjectArgument(MethodCallExpression expression)
-        {
-            if (expression.Object == null)
-            {
-                return Argument.Static;
-            }
-            return Argument.Value(expression.Object);
-        }
-
-        private static Method GetMethod(MethodCallExpression expression)
-        {
-            return new Method(
-                expression.Method.DeclaringType,
-                expression.Method.Name,
-                expression.Method.GetParameters()
-                    .Select(parameterInfo => parameterInfo.ParameterType)
-                    .ToList()
-                    .AsReadOnly());
-        }
-
-        private static IReadOnlyCollection<Argument> GetArguments(MethodCallExpression expression)
-        {
-            return expression.Arguments
-                .Select(ExpressionHelper.Evaluate)
-                .Select(Argument.Value)
-                .ToList()
-                .AsReadOnly();
         }
     }
 }

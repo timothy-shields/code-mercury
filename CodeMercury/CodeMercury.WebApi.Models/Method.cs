@@ -17,6 +17,6 @@ namespace CodeMercury.WebApi.Models
         public string Name { get; set; }
 
         [DataMember(Name = "parameter_types")]
-        public IList<Type> ParameterTypes { get; set; }
+        public IEnumerable<Type> ParameterTypes { get; set; }
     }
 }
