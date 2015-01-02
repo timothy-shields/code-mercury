@@ -33,7 +33,8 @@ namespace CodeMercury.Components
         {
             var @object = ResolveObject(invocation.Object);
             var method = ResolveMethod(invocation.Method, @object);
-            var arguments = invocation.Arguments.Select(ResolveArgument).ToArray();
+            var arguments = Enumerable.Zip(method.Parameters, invocation.Arguments,
+                (parameter, argument) => ResolveArgument(parameter, argument)).ToArray();
             var result = Invoke(@object, method.MethodInfo, arguments);
             return await CreateResultAsync(method.ReturnType, result);
         }
@@ -60,12 +61,11 @@ namespace CodeMercury.Components
             return method.WithDeclaringType(@object.GetType());
         }
 
-        private object ResolveArgument(Argument argument)
+        private object ResolveArgument(Parameter parameter, Argument argument)
         {
             if (argument is ProxyArgument)
             {
-                var proxyArgument = (ProxyArgument)argument;
-                return proxyResolver.Resolve(proxyArgument.ServiceId, proxyArgument.ServiceType);
+                return proxyResolver.Resolve(argument.CastTo<ProxyArgument>().ServiceId, parameter.ParameterType);
             }
             if (argument is ValueArgument)
             {

@@ -18,20 +18,14 @@ namespace CodeMercury.Domain.Models
         /// </summary>
         public Guid ServiceId { get; private set; }
 
-        /// <summary>
-        /// The type of the service being proxied.
-        /// </summary>
-        public Type ServiceType { get; private set; }
-
-        public ProxyArgument(Guid serviceId, Type serviceType)
+        public ProxyArgument(Guid serviceId)
         {
             this.ServiceId = serviceId;
-            this.ServiceType = serviceType;
         }
 
         public override string ToString()
         {
-            return string.Format("Proxy({0}, {1})", ServiceId, ServiceType.Name);
+            return string.Format("Proxy({0})", ServiceId);
         }
     }
 }

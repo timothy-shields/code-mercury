@@ -99,7 +99,7 @@ namespace CodeMercury.WebApi.Controllers
                 {
                     if (argument is WebApi.Models.ProxyArgument)
                     {
-                        return new ProxyArgument(argument.CastTo<WebApi.Models.ProxyArgument>().ServiceId, parameter.ParameterType);
+                        return new ProxyArgument(argument.CastTo<WebApi.Models.ProxyArgument>().ServiceId);
                     }
                     if (argument is WebApi.Models.ValueArgument)
                     {
