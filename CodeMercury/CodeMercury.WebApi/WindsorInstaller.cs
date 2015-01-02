@@ -54,8 +54,8 @@ namespace CodeMercury.WebApi
                             { typeof(IGizmoCache), invoker => new ProxyGizmoCache(invoker) }
                         }))
                     .LifestyleSingleton(),
-                Component.For<IProxyContainer, IProxyResolver>()
-                    .ImplementedBy<ProxyContainer>()
+                Component.For<IProxyResolver>()
+                    .ImplementedBy<ProxyResolver>()
                     .DependsOn(
                         Dependency.OnComponent<IInvoker, HttpInvoker>())
                     .LifestyleSingleton(),

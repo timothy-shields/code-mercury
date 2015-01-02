@@ -20,16 +20,10 @@ namespace CodeMercury.WebApi.Controllers
     public class InvocationController : ApiController
     {
         private readonly IInvoker invoker;
-        private readonly IProxyContainer proxyContainer;
 
-        private readonly HttpClient client;
-
-        public InvocationController(IInvoker invoker, IProxyContainer proxyContainer)
+        public InvocationController(IInvoker invoker)
         {
             this.invoker = invoker;
-            this.proxyContainer = proxyContainer;
-
-            this.client = new HttpClient();
         }
 
         [Route("invocations")]
@@ -105,9 +99,7 @@ namespace CodeMercury.WebApi.Controllers
                 {
                     if (argument is WebApi.Models.ProxyArgument)
                     {
-                        var serviceId = argument.CastTo<WebApi.Models.ProxyArgument>().ServiceId;
-                        proxyContainer.Register(serviceId, parameter.ParameterType);
-                        return new ProxyArgument(serviceId);
+                        return new ProxyArgument(argument.CastTo<WebApi.Models.ProxyArgument>().ServiceId, parameter.ParameterType);
                     }
                     if (argument is WebApi.Models.ValueArgument)
                     {

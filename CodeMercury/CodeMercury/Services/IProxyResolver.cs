@@ -12,10 +12,11 @@ namespace CodeMercury.Services
     public interface IProxyResolver
     {
         /// <summary>
-        /// Resolves a proxy instance by service ID.
+        /// Resolves a proxy instance.
         /// </summary>
         /// <param name="serviceId">The service ID.</param>
+        /// <param name="serviceType">The service type.</param>
         /// <returns>The proxy instance.</returns>
-        IProxy Resolve(Guid serviceId);
+        IProxy Resolve(Guid serviceId, Type serviceType);
     }
 }

@@ -32,7 +32,7 @@ namespace CodeMercury.Components
         public async Task<Argument> InvokeAsync(Invocation invocation)
         {
             var @object = ResolveObject(invocation.Object);
-            var method = ResolveMethod(invocation.Method, @object);   
+            var method = ResolveMethod(invocation.Method, @object);
             var arguments = invocation.Arguments.Select(ResolveArgument).ToArray();
             var result = Invoke(@object, method.MethodInfo, arguments);
             return await CreateResultAsync(method.ReturnType, result);
@@ -64,7 +64,8 @@ namespace CodeMercury.Components
         {
             if (argument is ProxyArgument)
             {
-                return proxyResolver.Resolve(argument.CastTo<ProxyArgument>().ServiceId);
+                var proxyArgument = (ProxyArgument)argument;
+                return proxyResolver.Resolve(proxyArgument.ServiceId, proxyArgument.ServiceType);
             }
             if (argument is ValueArgument)
             {

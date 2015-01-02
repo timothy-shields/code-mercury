@@ -95,16 +95,14 @@
     <Compile Include="CodeMercuryBugException.cs" />
     <Compile Include="Components\CompositeInvoker.cs" />
     <Compile Include="Components\ProxyActivator.cs" />
-    <Compile Include="Components\ProxyContainer.cs" />
+    <Compile Include="Components\ProxyResolver.cs" />
     <Compile Include="Components\ScopedServiceContainer.cs" />
-    <Compile Include="Components\ScopedProxyContainer.cs" />
     <Compile Include="Domain\Models\TaskArgument.cs" />
     <Compile Include="Services\IInvoker.cs" />
     <Compile Include="Services\InvokerExtensions.cs" />
     <Compile Include="Services\IProxy.cs" />
     <Compile Include="Services\IServiceResolver.cs" />
     <Compile Include="Services\IProxyActivator.cs" />
-    <Compile Include="Services\IProxyContainer.cs" />
     <Compile Include="Services\IProxyResolver.cs" />
     <Compile Include="Services\IServiceContainer.cs" />
     <Compile Include="Components\LocalInvoker.cs" />
