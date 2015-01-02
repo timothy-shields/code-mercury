@@ -113,8 +113,7 @@ namespace CodeMercury.WebApi.Components
                 Parameters = method.Parameters
                     .Select(parameter => new WebApi.Models.Parameter
                     {
-                        ParameterType = parameter.ParameterType,
-                        Name = parameter.Name
+                        ParameterType = parameter.ParameterType
                     })
                     .ToList()
             };

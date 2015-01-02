@@ -34,7 +34,7 @@ namespace CodeMercury.Tests
         {
             var invocation = new Invocation(
                 new StaticArgument(),
-                new Method(typeof(Math), "Max", new List<Parameter> { new Parameter(typeof(int), "val1"), new Parameter(typeof(int), "val2") }),
+                new Method(typeof(Math), "Max", new List<Parameter> { new Parameter(typeof(int)), new Parameter(typeof(int)) }),
                 new List<Argument> { new ValueArgument(5), new ValueArgument(7) });
 
             var argument = await LocalInvoker.InvokeAsync(invocation);
@@ -50,7 +50,7 @@ namespace CodeMercury.Tests
 
             var invocation = new Invocation(
                 new ServiceArgument(serviceId),
-                new Method(typeof(List<int>), "IndexOf", new List<Parameter> { new Parameter(typeof(int), "item") }),
+                new Method(typeof(List<int>), "IndexOf", new List<Parameter> { new Parameter(typeof(int)) }),
                 new List<Argument> { new ValueArgument(7) });
 
             var argument = await LocalInvoker.InvokeAsync(invocation);

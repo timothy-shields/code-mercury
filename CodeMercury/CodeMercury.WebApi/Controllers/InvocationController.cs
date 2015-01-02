@@ -87,7 +87,7 @@ namespace CodeMercury.WebApi.Controllers
             return new Method(
                 method.DeclaringType,
                 method.Name,
-                method.Parameters.Select(parameter => new Parameter(parameter.ParameterType, parameter.Name)).ToList().AsReadOnly());
+                method.Parameters.Select(parameter => new Parameter(parameter.ParameterType)).ToList().AsReadOnly());
         }
 
         private IReadOnlyCollection<Argument> ConvertArguments(WebApi.Models.InvocationRequest invocationRequest)

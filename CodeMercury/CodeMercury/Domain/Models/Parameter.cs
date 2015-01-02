@@ -16,27 +16,15 @@ namespace CodeMercury.Domain.Models
         /// The parameter type.
         /// </summary>
         public Type ParameterType { get; private set; }
-        
-        /// <summary>
-        /// The parameter name.
-        /// </summary>
-        public string Name { get; private set; }
 
-        public Parameter(Type parameterType, string name)
+        public Parameter(Type parameterType)
         {
             this.ParameterType = parameterType;
-            this.Name = name;
-        }
-
-        public Parameter(ParameterInfo parameterInfo)
-        {
-            this.ParameterType = parameterInfo.ParameterType;
-            this.Name = parameterInfo.Name;
         }
 
         public override string ToString()
         {
-            return string.Format("Parameter({0} {1})", ParameterType.Name, Name);
+            return string.Format("Parameter({0})", ParameterType.Name);
         }
     }
 }
