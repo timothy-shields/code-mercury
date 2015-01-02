@@ -11,16 +11,7 @@ namespace CodeMercury.WebApi.Models
     [DataContract(Name = "invocation_completion")]
     public class InvocationCompletion
     {
-        [DataMember(Name = "invocation_id", IsRequired = true)]
-        public Guid InvocationId { get; set; }
-
-        [DataMember(Name = "status", IsRequired = true)]
-        public InvocationStatus Status { get; set; }
-
-        [DataMember(Name = "result")]
+        [DataMember(Name = "result", IsRequired = true)]
         public Argument Result { get; set; }
-
-        [DataMember(Name = "exception")]
-        public InvocationException Exception { get; set; }
     }
 }

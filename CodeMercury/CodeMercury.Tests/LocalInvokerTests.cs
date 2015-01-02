@@ -24,8 +24,8 @@ namespace CodeMercury.Tests
         [TestInitialize]
         public void Initialize()
         {
-            serviceResolver = new Mock<IServiceResolver>();
-            proxyResolver = new Mock<IProxyResolver>();
+            serviceResolver = new Mock<IServiceResolver>(MockBehavior.Strict);
+            proxyResolver = new Mock<IProxyResolver>(MockBehavior.Strict);
             localInvoker = new Lazy<LocalInvoker>(() => new LocalInvoker(serviceResolver.Object, proxyResolver.Object));
         }
 

@@ -14,6 +14,11 @@ namespace CodeMercury.Services
     /// </summary>
     public interface IInvoker
     {
+        /// <summary>
+        /// Invokes the given <see cref="Invocation"/>.
+        /// </summary>
+        /// <param name="invocation">The invocation.</param>
+        /// <returns>The result of the invocation.</returns>
         Task<Argument> InvokeAsync(Invocation invocation);
     }
 }

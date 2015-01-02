@@ -61,7 +61,10 @@ namespace CodeMercury.Services
             return new Method(
                 expression.Method.DeclaringType,
                 expression.Method.Name,
-                expression.Method.GetParameters().Select(parameter => new Parameter(parameter.ParameterType)).ToList().AsReadOnly());
+                expression.Method.GetParameters()
+                    .Select(parameter => new Parameter(parameter.ParameterType))
+                    .ToList()
+                    .AsReadOnly());
         }
 
         private static IReadOnlyCollection<ValueArgument> GetArguments(MethodCallExpression expression)

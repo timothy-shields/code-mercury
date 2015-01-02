@@ -39,19 +39,8 @@ namespace CodeMercury.WebApi.Components
                 var response = await client.PostAsJsonAsync("invocations", request);
                 response.EnsureSuccessStatusCode();
                 var completion = await response.Content.ReadAsAsync<WebApi.Models.InvocationCompletion>();
-                if (completion.Status == WebApi.Models.InvocationStatus.RanToCompletion)
-                {
-                    return ConvertResult(completion.Result);
-                }
-                if (completion.Status == WebApi.Models.InvocationStatus.Canceled)
-                {
-                    throw new OperationCanceledException();
-                }
-                if (completion.Status == WebApi.Models.InvocationStatus.Faulted)
-                {
-                    throw new InvocationException(completion.Exception.Content);
-                }
-                throw new CodeMercuryBugException();
+                var result = ConvertResult(completion.Result);
+                return result;
             }
         }
 
@@ -126,11 +115,11 @@ namespace CodeMercury.WebApi.Components
                 var value = argument.CastTo<ValueArgument>().Value;
                 if (IsProxyable(parameter.ParameterType))
                 {
-                    var proxyId = Guid.NewGuid();
-                    serviceContainer.Register(proxyId, value);
+                    var serviceId = Guid.NewGuid();
+                    serviceContainer.Register(serviceId, value);
                     return new WebApi.Models.ProxyArgument
                     {
-                        ServiceId = proxyId
+                        ServiceId = serviceId
                     };
                 }
                 else

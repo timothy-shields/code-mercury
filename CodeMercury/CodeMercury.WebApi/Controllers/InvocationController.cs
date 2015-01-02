@@ -34,38 +34,11 @@ namespace CodeMercury.WebApi.Controllers
             var arguments = ConvertArguments(invocationRequest);
             var invocation = new Invocation(@object, method, arguments);
 
-            WebApi.Models.InvocationCompletion completion = null;
-            Argument resultArgument = null;
-            try
+            var result = await invoker.InvokeAsync(invocation);
+            var completion = new WebApi.Models.InvocationCompletion
             {
-                resultArgument = await invoker.InvokeAsync(invocation);
-            }
-            catch (OperationCanceledException)
-            {
-                completion = new WebApi.Models.InvocationCompletion
-                {
-                    Status = WebApi.Models.InvocationStatus.Canceled
-                };
-            }
-            catch (Exception exception)
-            {
-                completion = new WebApi.Models.InvocationCompletion
-                {
-                    Status = WebApi.Models.InvocationStatus.Faulted,
-                    Exception = new WebApi.Models.InvocationException
-                    {
-                        Content = exception.ToString()
-                    }
-                };
-            }
-            if (completion == null)
-            {
-                completion = new WebApi.Models.InvocationCompletion
-                {
-                    Status = WebApi.Models.InvocationStatus.RanToCompletion,
-                    Result = ConvertResult(method.ReturnType, resultArgument)
-                };
-            }
+                Result = ConvertResult(method.ReturnType, result)
+            };
             return completion;
         }
 
