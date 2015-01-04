@@ -10,6 +10,13 @@ namespace CodeMercury.Components
 {
     public class ArgumentMaterializer : IArgumentMaterializer
     {
+        private static readonly ArgumentMaterializer @default = new ArgumentMaterializer();
+
+        public static ArgumentMaterializer Default
+        {
+            get { return @default; }
+        }
+
         public object Materialize(Type type, Argument argument)
         {
             if (argument is CanceledArgument)

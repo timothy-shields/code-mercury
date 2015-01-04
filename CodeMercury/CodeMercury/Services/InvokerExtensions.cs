@@ -1,4 +1,5 @@
-﻿using CodeMercury.Domain.Models;
+﻿using CodeMercury.Components;
+using CodeMercury.Domain.Models;
 using CodeMercury.Expressions;
 using System;
 using System.Collections.Generic;
@@ -11,41 +12,50 @@ namespace CodeMercury.Services
 {
     public static class InvokerExtensions
     {
-        public static async Task<TResult> InvokeAsync<TResult>(this IInvoker invoker, Expression<Func<Task<TResult>>> expression)
+        public static async Task<TResult> InvokeAsync<TResult>(this IInvoker invoker, Expression<Func<Task<TResult>>> expression, IArgumentMaterializer argumentMaterializer = default(IArgumentMaterializer))
         {
+            if (argumentMaterializer == null)
+            {
+                argumentMaterializer = ArgumentMaterializer.Default;
+            }
             var invocation = InvocationBuilder.Build(expression);
             var resultArgument = await invoker.InvokeAsync(invocation).ConfigureAwait(false);
-            var result = resultArgument.CastTo<TaskArgument>().Result.CastTo<ValueArgument>().Value.CastTo<TResult>();
+            var result = await (Task<TResult>)argumentMaterializer.Materialize(invocation.Method.ReturnType, resultArgument);
             return result;
         }
 
-        public static async Task InvokeAsync(this IInvoker invoker, Expression<Func<Task>> expression)
+        public static async Task InvokeAsync(this IInvoker invoker, Expression<Func<Task>> expression, IArgumentMaterializer argumentMaterializer = default(IArgumentMaterializer))
         {
+            if (argumentMaterializer == null)
+            {
+                argumentMaterializer = ArgumentMaterializer.Default;
+            }
             var invocation = InvocationBuilder.Build(expression);
             var resultArgument = await invoker.InvokeAsync(invocation).ConfigureAwait(false);
-            var result = resultArgument.CastTo<TaskArgument>().Result.CastTo<VoidArgument>();
+            await (Task)argumentMaterializer.Materialize(invocation.Method.ReturnType, resultArgument);
         }
 
-        public static async Task<TResult> InvokeAsync<TResult>(this IInvoker invoker, Expression<Func<TResult>> expression)
+        public static async Task<TResult> InvokeAsync<TResult>(this IInvoker invoker, Expression<Func<TResult>> expression, IArgumentMaterializer argumentMaterializer = default(IArgumentMaterializer))
         {
+            if (argumentMaterializer == null)
+            {
+                argumentMaterializer = ArgumentMaterializer.Default;
+            }
             var invocation = InvocationBuilder.Build(expression);
             var resultArgument = await invoker.InvokeAsync(invocation).ConfigureAwait(false);
-            var result = resultArgument.CastTo<ValueArgument>().Value.CastTo<TResult>();
+            var result = (TResult)argumentMaterializer.Materialize(invocation.Method.ReturnType, resultArgument);
             return result;
         }
 
-        public static async Task InvokeAsync(this IInvoker invoker, Expression<Action> expression)
+        public static async Task InvokeAsync(this IInvoker invoker, Expression<Action> expression, IArgumentMaterializer argumentMaterializer = default(IArgumentMaterializer))
         {
+            if (argumentMaterializer == null)
+            {
+                argumentMaterializer = ArgumentMaterializer.Default;
+            }
             var invocation = InvocationBuilder.Build(expression);
             var resultArgument = await invoker.InvokeAsync(invocation).ConfigureAwait(false);
-            var result = resultArgument.CastTo<VoidArgument>();
-        }
-
-        public static async Task<Argument> InvokeAsync(this IInvoker invoker, MethodCallExpression expression)
-        {
-            var invocation = InvocationBuilder.Build(expression);
-            var result = await invoker.InvokeAsync(invocation).ConfigureAwait(false);
-            return result;
+            var result = argumentMaterializer.Materialize(invocation.Method.ReturnType, resultArgument);
         }
     }
 }
