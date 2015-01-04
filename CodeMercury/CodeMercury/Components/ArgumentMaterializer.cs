@@ -19,7 +19,8 @@ namespace CodeMercury.Components
             if (argument is ExceptionArgument)
             {
                 var exceptionArgument = argument.CastTo<ExceptionArgument>();
-                throw CapturedException.Create(exceptionArgument.Exception);
+                var capturedException = CapturedException.Create(exceptionArgument.Exception);
+                throw capturedException;
             }
             if (argument is TaskArgument)
             {
@@ -31,7 +32,9 @@ namespace CodeMercury.Components
                 }
                 if (taskArgument.Result is ExceptionArgument)
                 {
-                    return FaultedTask(resultType, taskArgument.Result.CastTo<ExceptionArgument>().Exception);
+                    var exceptionArgument = taskArgument.Result.CastTo<ExceptionArgument>();
+                    var capturedException = CapturedException.Create(exceptionArgument.Exception);
+                    return FaultedTask(resultType, capturedException);
                 }
                 return CompletedTask(resultType, Materialize(resultType, taskArgument.Result));
             }
@@ -51,7 +54,7 @@ namespace CodeMercury.Components
             return Activator.CreateInstance(typeof(TaskCompletionSource<>).MakeGenericType(resultType));
         }
 
-        private static object CompletedTask(Type resultType, object result)
+        private static object CompletedTask(Type resultType, dynamic result)
         {
             var tcs = CreateTaskCompletionSource(resultType);
             tcs.SetResult(result);

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -51,7 +53,13 @@ namespace CodeMercury.Domain.Models
             {
                 return Create(exceptionType.GetGenericArguments().Single(), contents);
             }
-            return (CapturedException)Activator.CreateInstance(typeof(CapturedException<>).MakeGenericType(exceptionType), contents);
+            var capturedExceptionType = typeof(CapturedException<>).MakeGenericType(exceptionType);
+            var capturedException = (CapturedException)Activator.CreateInstance(
+                capturedExceptionType,
+                BindingFlags.NonPublic | BindingFlags.Instance, default(Binder),
+                new object[] { contents },
+                default(CultureInfo));
+            return capturedException;
         }
 
         public static CapturedException Create(Exception exception)
